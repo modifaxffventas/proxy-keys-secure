@@ -138,9 +138,10 @@ export async function isUserBlocked(key: string): Promise<boolean> {
 }
 
 export function generateKey(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  const segment = () => Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  return `PROXY-${segment()}-${segment()}`;
+  // Formato numérico de 10 dígitos, ej: 8935711154
+  let k = String(1 + Math.floor(Math.random() * 9));
+  for (let i = 0; i < 9; i++) k += String(Math.floor(Math.random() * 10));
+  return k;
 }
 
 export async function generateKeys(count: number, type: ProxyKey['type'], duration: string): Promise<ProxyKey[]> {

@@ -87,7 +87,7 @@ const Login = () => {
             >
               <div className="p-[2px] rounded-full bg-background">
                 <div className="w-24 h-24 rounded-full overflow-hidden bg-black">
-                  <img src={RAVE_LOGO} alt="Rave" className="w-full h-full object-cover" />
+                  <img src={RAVE_LOGO} alt="Boykaffx7" className="w-full h-full object-cover" />
                 </div>
               </div>
             </div>
@@ -104,7 +104,7 @@ const Login = () => {
                 letterSpacing: "-0.02em",
               }}
             >
-              Rave
+              Boykaffx7
             </h1>
             <VerifiedBadge size={20} />
           </div>

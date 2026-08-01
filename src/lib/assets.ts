@@ -1,6 +1,6 @@
 // Public assets served from /public. These paths work on any host
 // (Vercel, Lovable, static hosting) — no CDN rewrite required.
-export const RAVE_LOGO = "/media/rave-logo.png";
+export const RAVE_LOGO = "/media/boykaffx7-logo.jpeg";
 export const EXAMPLE_VIDEO = "/media/rave-demo.mp4";
 export const RAVE_MASCOT = "/media/rave-mascot.png";
 export const RAVE_MASCOT_RED = "/media/rave-mascot-red.png";

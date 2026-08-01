@@ -528,7 +528,7 @@ const ProxyConfig = () => {
       >
         <img
           src={RAVE_MODULES_BANNER}
-          alt="Rave Modules"
+          alt="Boykaffx7 Modules"
           className="w-full h-auto block object-cover"
           loading="eager"
           decoding="async"

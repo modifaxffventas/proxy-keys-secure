@@ -128,9 +128,10 @@ async function deleteReceipt(supabase: any, order: any) {
 }
 
 function genKey(): string {
-  const c = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  const seg = () => Array.from({ length: 4 }, () => c[Math.floor(Math.random() * c.length)]).join("");
-  return `RAVE-${seg()}-${seg()}`;
+  // Formato numérico de 10 dígitos, ej: 8935711154
+  let k = String(1 + Math.floor(Math.random() * 9));
+  for (let i = 0; i < 9; i++) k += String(Math.floor(Math.random() * 10));
+  return k;
 }
 
 async function createKey(supabase: any, type: string, duration: string): Promise<string> {
