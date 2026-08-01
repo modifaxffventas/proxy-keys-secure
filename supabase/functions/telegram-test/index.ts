@@ -9,8 +9,8 @@ Deno.serve(async (req) => {
 
   const token = Deno.env.get("TELEGRAM_BOT_TOKEN");
   const adminId = Deno.env.get("TELEGRAM_ADMIN_ID");
-  if (!token || !adminId) {
-    return new Response(JSON.stringify({ error: "Faltan TELEGRAM_BOT_TOKEN o TELEGRAM_ADMIN_ID" }), {
+  if (!token) {
+    return new Response(JSON.stringify({ error: "Falta TELEGRAM_BOT_TOKEN" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
