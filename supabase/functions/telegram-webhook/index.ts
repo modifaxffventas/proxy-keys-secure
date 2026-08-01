@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-telegram-bot-api-secret-token",
 };
 
-const ADMIN_PASSWORD = "rave117";
+const ADMIN_PASSWORDS = ["rave117", "boyka117", "117"];
 
 const DURATION_MS: Record<string, number> = {
   "1 minuto": 60 * 1000,
@@ -200,7 +200,7 @@ async function generateKeyForOrder(supabase: any, order: any): Promise<string> {
 
 function helpText(): string {
   return (
-    "<b>Rave — Admin Bot</b>\n\n" +
+    "<b>Boykaffx7 — Admin Bot</b>\n\n" +
     "Usa los botones de abajo o estos comandos:\n\n" +
     "/generar — generar nueva key (interactivo)\n" +
     "/generar Normal 7 días 5 — generar varias keys\n" +
@@ -246,17 +246,17 @@ async function handleTextOrCommand(
       await setPending(supabase, chat_id, { type: "auth" });
       await tg("sendMessage", {
         chat_id, parse_mode: "HTML",
-        text: "<b>Rave Admin</b>\nIngresa la contraseña secreta para continuar:",
+        text: "<b>Boykaffx7 Admin</b>\nIngresa la contraseña secreta para continuar:",
         reply_markup: { remove_keyboard: true },
       });
       return;
     }
-    if ((await getPending(supabase, chat_id))?.type === "auth" || trimmed === ADMIN_PASSWORD) {
-      if (trimmed === ADMIN_PASSWORD) {
+    if ((await getPending(supabase, chat_id))?.type === "auth" || ADMIN_PASSWORDS.includes(trimmed)) {
+      if (ADMIN_PASSWORDS.includes(trimmed)) {
         await saveAuth(supabase, chat_id);
         await clearPending(supabase, chat_id);
         await reply(chat_id,
-          "<b>Acceso concedido</b>\n\nBienvenido al panel de Rave.\nUsa la barra inferior para todas las funciones.");
+          "<b>Acceso concedido</b>\n\nBienvenido al panel de Boykaffx7.\nUsa la barra inferior para todas las funciones.");
         return;
       }
       await tg("sendMessage", { chat_id, text: "Contraseña incorrecta. Intenta de nuevo:" });
@@ -287,12 +287,11 @@ async function handleTextOrCommand(
       chat_id, parse_mode: "HTML",
       text: "Duración:",
       reply_markup: {
-        keyboard: [
-          [{ text: "1 día" }, { text: "7 días" }],
-          [{ text: "30 días" }, { text: "1 minuto" }],
-          [{ text: "Cancelar" }],
+        inline_keyboard: [
+          [{ text: "1 día", callback_data: "gdur:1 día" }, { text: "7 días", callback_data: "gdur:7 días" }],
+          [{ text: "30 días", callback_data: "gdur:30 días" }, { text: "1 minuto", callback_data: "gdur:1 minuto" }],
+          [{ text: "Cancelar", callback_data: "gcancel:x" }],
         ],
-        resize_keyboard: true,
       },
     });
     return;
@@ -310,8 +309,14 @@ async function handleTextOrCommand(
     await setPending(supabase, chat_id, { type: "gen_quantity", data: { type: p.data.type, duration: trimmed } });
     await tg("sendMessage", {
       chat_id, parse_mode: "HTML",
-      text: "Cantidad de keys (1-100):",
-      reply_markup: { keyboard: [[{ text: "1" }, { text: "5" }, { text: "10" }], [{ text: "Cancelar" }]], resize_keyboard: true },
+      text: "Cantidad de keys (1-100). Toca un número o escríbelo:",
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "1", callback_data: "gqty:1" }, { text: "5", callback_data: "gqty:5" }, { text: "10", callback_data: "gqty:10" }],
+          [{ text: "25", callback_data: "gqty:25" }, { text: "50", callback_data: "gqty:50" }, { text: "100", callback_data: "gqty:100" }],
+          [{ text: "Cancelar", callback_data: "gcancel:x" }],
+        ],
+      },
     });
     return;
   }
@@ -337,7 +342,7 @@ async function handleTextOrCommand(
   switch (trimmed) {
     case "Inicio":
     case "/inicio":
-      await reply(chat_id, "<b>Rave — Panel principal</b>\nElige una opción de la barra inferior.");
+      await reply(chat_id, "<b>Boykaffx7 — Panel principal</b>\nElige una opción de la barra inferior.");
       return;
     case "Ayuda":
     case "/help":
@@ -361,10 +366,12 @@ async function handleTextOrCommand(
       await setPending(supabase, chat_id, { type: "gen_type" });
       await tg("sendMessage", {
         chat_id, parse_mode: "HTML",
-        text: "Tipo de key:",
+        text: "<b>Generar Key</b>\nTipo de key:",
         reply_markup: {
-          keyboard: [[{ text: "Normal" }, { text: "Premium" }], [{ text: "Cancelar" }]],
-          resize_keyboard: true,
+          inline_keyboard: [
+            [{ text: "Normal", callback_data: "gtype:Normal" }, { text: "Premium", callback_data: "gtype:Premium" }],
+            [{ text: "Cancelar", callback_data: "gcancel:x" }],
+          ],
         },
       });
       return;
