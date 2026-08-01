@@ -625,6 +625,63 @@ Deno.serve(async (req) => {
         return;
       }
 
+      // Flujo de generación de keys por botones en línea (la barra inferior nunca cambia)
+      if (action === "gcancel") {
+        await clearPending(supabase, Number(chat_id));
+        await ack(cb.id, "Cancelado");
+        await tg("editMessageText", { chat_id, message_id, text: "Operación cancelada." });
+        return;
+      }
+      if (action === "gtype") {
+        await setPending(supabase, Number(chat_id), { type: "gen_duration", data: { type: paymentId } });
+        await ack(cb.id, paymentId);
+        await tg("editMessageText", {
+          chat_id, message_id, parse_mode: "HTML",
+          text: `<b>Generar Key</b>\nTipo: ${paymentId}\nDuración:`,
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: "1 día", callback_data: "gdur:1 día" }, { text: "7 días", callback_data: "gdur:7 días" }],
+              [{ text: "30 días", callback_data: "gdur:30 días" }, { text: "1 minuto", callback_data: "gdur:1 minuto" }],
+              [{ text: "Cancelar", callback_data: "gcancel:x" }],
+            ],
+          },
+        });
+        return;
+      }
+      if (action === "gdur") {
+        const duration = data.slice(action.length + 1);
+        const pend = await getPending(supabase, Number(chat_id));
+        const type = pend?.data?.type || "Normal";
+        await setPending(supabase, Number(chat_id), { type: "gen_quantity", data: { type, duration } });
+        await ack(cb.id, duration);
+        await tg("editMessageText", {
+          chat_id, message_id, parse_mode: "HTML",
+          text: `<b>Generar Key</b>\nTipo: ${type}\nDuración: ${duration}\nCantidad:`,
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: "1", callback_data: "gqty:1" }, { text: "5", callback_data: "gqty:5" }, { text: "10", callback_data: "gqty:10" }],
+              [{ text: "25", callback_data: "gqty:25" }, { text: "50", callback_data: "gqty:50" }, { text: "100", callback_data: "gqty:100" }],
+              [{ text: "Cancelar", callback_data: "gcancel:x" }],
+            ],
+          },
+        });
+        return;
+      }
+      if (action === "gqty") {
+        const pend = await getPending(supabase, Number(chat_id));
+        const type = pend?.data?.type || "Normal";
+        const duration = pend?.data?.duration || "1 día";
+        const quantity = Math.max(1, Math.min(100, Number(paymentId) || 1));
+        const keys = await createKeys(supabase, type, duration, quantity);
+        await clearPending(supabase, Number(chat_id));
+        await ack(cb.id, `${keys.length} keys`);
+        await tg("editMessageText", {
+          chat_id, message_id, parse_mode: "HTML",
+          text: `<b>${keys.length} key${keys.length === 1 ? "" : "s"} generada${keys.length === 1 ? "" : "s"}</b>\nTipo: ${type}\nDuración: ${duration}\n\n${keys.map((k: string) => `<code>${k}</code>`).join("\n")}`,
+        });
+        return;
+      }
+
       const { data: order } = await supabase.from("payment_orders").select("*").eq("payment_id", paymentId).maybeSingle();
       if (!order) { await ack(cb.id, "No encontrado"); return; }
 
