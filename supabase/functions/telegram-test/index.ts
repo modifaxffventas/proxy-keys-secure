@@ -22,15 +22,29 @@ Deno.serve(async (req) => {
     if (body?.text) text = String(body.text).slice(0, 3000);
   } catch { /* sin body */ }
 
-  const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: adminId, text }),
-  });
-  const out = await res.json();
+  // Destinatarios: TELEGRAM_ADMIN_ID si existe, si no todas las sesiones admin del bot.
+  let targets: string[] = adminId ? [adminId] : [];
+  if (targets.length === 0) {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const r = await fetch(`${supabaseUrl}/rest/v1/telegram_admin_sessions?select=chat_id`, {
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
+    });
+    const rows = await r.json().catch(() => []);
+    targets = Array.isArray(rows) ? rows.map((x: any) => String(x.chat_id)) : [];
+  }
 
-  return new Response(JSON.stringify(out), {
-    status: res.ok ? 200 : res.status,
+  const results: any[] = [];
+  for (const chatId of targets) {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text }),
+    });
+    results.push({ chat_id: chatId, result: await res.json() });
+  }
+
+  return new Response(JSON.stringify({ sent: results.length, results }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });
