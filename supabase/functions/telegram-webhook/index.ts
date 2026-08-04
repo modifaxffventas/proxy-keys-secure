@@ -332,7 +332,7 @@ async function handleText(supabase: any, chat_id: number, text: string, adminId:
       duration: p.duration,
       keys,
     });
-    await tg("deleteMessage", { chat_id, message_id: -1 }).catch?.(() => {});
+    
     return;
   }
 
