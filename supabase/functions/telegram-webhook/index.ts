@@ -2,37 +2,34 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-telegram-bot-api-secret-token",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-telegram-bot-api-secret-token",
 };
 
 const ADMIN_PASSWORDS = ["rave117", "boyka117", "117"];
 
 const DURATION_MS: Record<string, number> = {
-  "1 minuto": 60 * 1000,
-  "1 día": 24 * 60 * 60 * 1000,
-  "7 días": 7 * 24 * 60 * 60 * 1000,
-  "30 días": 30 * 24 * 60 * 60 * 1000,
+  "1 Día": 24 * 60 * 60 * 1000,
+  "7 Días": 7 * 24 * 60 * 60 * 1000,
+  "30 Días": 30 * 24 * 60 * 60 * 1000,
 };
 
-const ADD_TIME_MS: Record<string, number> = {
-  "30m": 30 * 60 * 1000,
-  "1h": 60 * 60 * 1000,
-  "6h": 6 * 60 * 60 * 1000,
-  "12h": 12 * 60 * 60 * 1000,
-  "1d": 24 * 60 * 60 * 1000,
-  "7d": 7 * 24 * 60 * 60 * 1000,
-};
+const BTN_GEN = "🏦 Generate License";
+const BTN_ACCOUNT = "*️⃣ Account";
+const BTN_STATS = "⏺️ Statistics";
 
 const MAIN_KEYBOARD = {
-  keyboard: [
-    [{ text: "Generar Key" }, { text: "Keys activas" }],
-    [{ text: "Usuarios" }, { text: "Pendientes" }],
-    [{ text: "Últimos" }, { text: "Stats" }],
-    [{ text: "Ayuda" }, { text: "Inicio" }],
-  ],
+  keyboard: [[{ text: BTN_GEN }], [{ text: BTN_ACCOUNT }, { text: BTN_STATS }]],
   resize_keyboard: true,
   is_persistent: true,
 };
+
+const NAV_ROW = [
+  { text: "🔙 Atrás", callback_data: "nav:back" },
+  { text: "🏠 Inicio", callback_data: "nav:home" },
+];
+
+const PAGE_SIZE = 6;
 
 async function tg(method: string, body: any) {
   const token = Deno.env.get("TELEGRAM_BOT_TOKEN");
@@ -57,25 +54,40 @@ async function tg(method: string, body: any) {
 const reply = (chat_id: number, text: string, extra: any = {}) =>
   tg("sendMessage", { chat_id, text, parse_mode: "HTML", reply_markup: MAIN_KEYBOARD, ...extra });
 
-const ack = (id: string, text = "OK") =>
+const send = (chat_id: number, text: string, inline: any[][]) =>
+  tg("sendMessage", {
+    chat_id,
+    text,
+    parse_mode: "HTML",
+    reply_markup: { inline_keyboard: inline },
+  });
+
+const edit = (chat_id: number, message_id: number, text: string, inline: any[][]) =>
+  tg("editMessageText", {
+    chat_id,
+    message_id,
+    text,
+    parse_mode: "HTML",
+    reply_markup: { inline_keyboard: inline },
+  });
+
+const ack = (id: string, text = "") =>
   tg("answerCallbackQuery", { callback_query_id: id, text });
 
-const editCaption = (chat_id: number, message_id: number, caption: string) =>
-  tg("editMessageCaption", { chat_id, message_id, caption, parse_mode: "HTML" });
-
-const deleteMessage = (chat_id: number, message_id: number) =>
-  tg("deleteMessage", { chat_id, message_id });
-
-// Pending interactive flows are persisted in DB to survive edge function cold starts.
+// ---------- session / pending state ----------
 async function getPending(supabase: any, chatId: number): Promise<any> {
-  const { data } = await supabase.from("telegram_admin_sessions")
-    .select("pending").eq("chat_id", String(chatId)).maybeSingle();
+  const { data } = await supabase
+    .from("telegram_admin_sessions")
+    .select("pending")
+    .eq("chat_id", String(chatId))
+    .maybeSingle();
   return data?.pending ?? null;
 }
 async function setPending(supabase: any, chatId: number, value: any) {
-  await supabase.from("telegram_admin_sessions").upsert({
-    chat_id: String(chatId), pending: value, last_seen_at: new Date().toISOString(),
-  }, { onConflict: "chat_id" });
+  await supabase.from("telegram_admin_sessions").upsert(
+    { chat_id: String(chatId), pending: value, last_seen_at: new Date().toISOString() },
+    { onConflict: "chat_id" },
+  );
 }
 async function clearPending(supabase: any, chatId: number) {
   await supabase.from("telegram_admin_sessions").update({ pending: null }).eq("chat_id", String(chatId));
@@ -87,71 +99,39 @@ function isAllowedAdmin(chatId: number, adminId: string): boolean {
 
 async function isAuthed(supabase: any, chatId: number, adminId: string): Promise<boolean> {
   if (!isAllowedAdmin(chatId, adminId)) return false;
-  const { data } = await supabase.from("telegram_admin_sessions")
-    .select("chat_id").eq("chat_id", String(chatId)).maybeSingle();
-  if (data) {
-    await supabase.from("telegram_admin_sessions")
-      .update({ last_seen_at: new Date().toISOString() }).eq("chat_id", String(chatId));
-  }
-  return !!data;
+  const { data } = await supabase
+    .from("telegram_admin_sessions")
+    .select("chat_id, authenticated_at")
+    .eq("chat_id", String(chatId))
+    .maybeSingle();
+  return !!data?.authenticated_at;
 }
 
 async function saveAuth(supabase: any, chatId: number) {
-  await supabase.from("telegram_admin_sessions").upsert({
-    chat_id: String(chatId),
-    authenticated_at: new Date().toISOString(),
-    last_seen_at: new Date().toISOString(),
-  }, { onConflict: "chat_id" });
+  await supabase.from("telegram_admin_sessions").upsert(
+    {
+      chat_id: String(chatId),
+      authenticated_at: new Date().toISOString(),
+      last_seen_at: new Date().toISOString(),
+      pending: null,
+    },
+    { onConflict: "chat_id" },
+  );
 }
 
-async function clearAuth(supabase: any, chatId: number) {
-  await supabase.from("telegram_admin_sessions").delete().eq("chat_id", String(chatId));
-}
-
-async function deleteReceipt(supabase: any, order: any) {
-  try {
-    if (order?.receipt_url) {
-      const marker = "/receipts/";
-      const idx = order.receipt_url.indexOf(marker);
-      if (idx >= 0) {
-        const path = decodeURIComponent(order.receipt_url.slice(idx + marker.length).split("?")[0]);
-        await supabase.storage.from("receipts").remove([path]);
-      }
-    }
-    await supabase.from("payment_orders").update({ receipt_url: null }).eq("id", order.id);
-    await supabase.from("payment_logs").insert({
-      payment_id: order.payment_id, event: "receipt_deleted", detail: { reason: "rejected" },
-    });
-  } catch (e) {
-    console.error("deleteReceipt error", e);
-  }
-}
-
+// ---------- keys ----------
 function genKey(): string {
-  // Formato numérico de 10 dígitos, ej: 8935711154
   let k = String(1 + Math.floor(Math.random() * 9));
   for (let i = 0; i < 9; i++) k += String(Math.floor(Math.random() * 10));
   return k;
 }
 
-async function createKey(supabase: any, type: string, duration: string): Promise<string> {
-  const durationMs = DURATION_MS[duration] || 0;
-  const key = genKey();
-  const { error } = await supabase.from("proxy_keys").insert({
-    key, type, status: "Activa",
-    duration, duration_ms: durationMs,
-    created_at: new Date().toISOString(),
-  });
-  if (error) throw new Error(`createKey failed: ${error.message}`);
-  return key;
-}
-
-async function createKeys(supabase: any, type: string, duration: string, quantity: number): Promise<string[]> {
+async function createKeys(supabase: any, duration: string, quantity: number): Promise<string[]> {
   const count = Math.max(1, Math.min(100, Number(quantity) || 1));
   const durationMs = DURATION_MS[duration] || 0;
   const rows = Array.from({ length: count }, () => ({
     key: genKey(),
-    type,
+    type: "Normal",
     status: "Activa",
     duration,
     duration_ms: durationMs,
@@ -160,10 +140,6 @@ async function createKeys(supabase: any, type: string, duration: string, quantit
   const { error } = await supabase.from("proxy_keys").insert(rows);
   if (error) throw new Error(`createKeys failed: ${error.message}`);
   return rows.map((r) => r.key);
-}
-
-function cleanKey(value = ""): string {
-  return value.trim().toUpperCase();
 }
 
 function timeLeft(expiresAt?: string): string {
@@ -178,405 +154,272 @@ function timeLeft(expiresAt?: string): string {
   return `${m}m`;
 }
 
-async function changeKeyTime(supabase: any, key: string, deltaMs: number): Promise<string> {
-  const { data, error } = await supabase.from("proxy_keys")
-    .select("key,expires_at,status").ilike("key", cleanKey(key)).maybeSingle();
-  if (error || !data || !data.expires_at) return "Key no encontrada o sin expiración activa.";
-  const next = new Date(new Date(data.expires_at).getTime() + deltaMs);
-  const status = next.getTime() <= Date.now() ? "Expirada" : "Usada";
-  const expires_at = next.toISOString();
-  await supabase.from("proxy_keys").update({ expires_at, status }).eq("key", data.key);
-  await supabase.from("active_users").update({ expires_at }).eq("key", data.key);
-  return `Tiempo actualizado para <code>${data.key}</code>\nExpira: ${next.toLocaleString("es-ES")}\nRestante: ${timeLeft(expires_at)}`;
+// ---------- screens ----------
+function durationScreen() {
+  return {
+    text: "❇️ <b>Selecciona la duración</b>",
+    inline: [
+      [{ text: "🛍️ 1 Día", callback_data: "dur:1 Día" }],
+      [{ text: "🛍️ 7 Días", callback_data: "dur:7 Días" }],
+      [{ text: "🛍️ 30 Días", callback_data: "dur:30 Días" }],
+      NAV_ROW,
+    ],
+  };
 }
 
-async function generateKeyForOrder(supabase: any, order: any): Promise<string> {
-  const key = await createKey(supabase, "Normal", order.duration);
-  await supabase.from("payment_logs").insert({
-    payment_id: order.payment_id, event: "key_generated", detail: { key, by: "telegram_admin" },
-  });
-  return key;
+function countScreen(duration: string) {
+  return {
+    text: `❇️ <b>Password Count</b>\n\nDuración: ${duration}\nEnvía la cantidad (1-100).`,
+    inline: [NAV_ROW],
+  };
 }
 
-function helpText(): string {
-  return (
-    "<b>Boykaffx7 — Admin Bot</b>\n\n" +
-    "Usa los botones de abajo o estos comandos:\n\n" +
-    "/generar — generar nueva key (interactivo)\n" +
-    "/generar Normal 7 días 5 — generar varias keys\n" +
-    "/keys — keys activas disponibles\n" +
-    "/usuarios — usuarios activos\n" +
-    "/bloquear KEY — bloquear usuario\n" +
-    "/desbloquear KEY — desbloquear usuario\n" +
-    "/sacar KEY — sacar sesión activa\n" +
-    "/eliminarusuario KEY — eliminar usuario y key\n" +
-    "/sumar KEY 1h — agregar tiempo: 30m, 1h, 6h, 12h, 1d, 7d\n" +
-    "/reducir KEY 6h — reducir tiempo\n" +
-    "/eliminarkey KEY — eliminar key\n" +
-    "/pendientes — pedidos en revisión\n" +
-    "/ultimos — últimos 10 pedidos\n" +
-    "/buscar HG-XXXX — buscar pedido\n" +
-    "/aprobar HG-XXXX — aprobar y generar key\n" +
-    "/rechazar HG-XXXX [motivo] — rechazar\n" +
-    "/reenviarkey HG-XXXX — reenviar key\n" +
-    "/stats — estadísticas\n" +
-    "/logs HG-XXXX — logs de pedido\n" +
-    "/cancelar HG-XXXX — cancelar pedido\n" +
-    "/logout — cerrar sesión admin"
-  );
+function resultScreen(keys: string[]) {
+  return {
+    text:
+      `*️⃣ <b>Generated Passwords: ${keys.length}</b>\n\n` +
+      keys.map((k) => `<code>${k}</code>`).join("\n"),
+    inline: [[{ text: "Copy Passwords", callback_data: "copy:x" }], NAV_ROW],
+  };
 }
 
-async function handleTextOrCommand(
-  supabase: any,
-  chat_id: number,
-  text: string,
-  adminId: string,
-) {
-  
+async function usersScreen(supabase: any, page: number) {
+  const from = page * PAGE_SIZE;
+  const { data, count } = await supabase
+    .from("active_users")
+    .select("*", { count: "exact" })
+    .order("login_at", { ascending: false })
+    .range(from, from + PAGE_SIZE - 1);
+  const rows = (data || []).map((u: any) => [
+    { text: u.name, callback_data: `user:${u.key}` },
+  ]);
+  const total = count ?? 0;
+  const nav: any[] = [];
+  if (page > 0) nav.push({ text: "🔙 Back", callback_data: `upage:${page - 1}` });
+  if (from + PAGE_SIZE < total) nav.push({ text: "Next 🔜", callback_data: `upage:${page + 1}` });
+  if (!nav.length) nav.push(...NAV_ROW);
+  return {
+    text: rows.length
+      ? `❇️ <b>Usuarios Activos</b> (${total})`
+      : "❇️ <b>Usuarios Activos</b>\n\nSin sesiones activas.",
+    inline: [...rows, nav],
+  };
+}
+
+async function userDetailScreen(supabase: any, key: string) {
+  const { data: u } = await supabase.from("active_users").select("*").eq("key", key).maybeSingle();
+  if (!u) return { text: "Usuario no encontrado.", inline: [NAV_ROW] };
+  const { data: k } = await supabase
+    .from("proxy_keys")
+    .select("duration,expires_at,status")
+    .eq("key", key)
+    .maybeSingle();
+  const expired = u.expires_at && new Date(u.expires_at).getTime() <= Date.now();
+  const estado = u.blocked ? "Bloqueado" : expired ? "Expirado" : "Activo";
+  return {
+    text:
+      `✴️ <b>${u.name}</b>\n\n` +
+      `Estado: ${estado}\n` +
+      `Password Duration: ${k?.duration || "—"}\n` +
+      `Restante: ${timeLeft(u.expires_at)}\n` +
+      `Key: <code>${u.key}</code>`,
+    inline: [NAV_ROW],
+  };
+}
+
+async function statsScreen(supabase: any) {
+  const [{ data: keyRows }, { data: userRows }] = await Promise.all([
+    supabase.from("proxy_keys").select("status,expires_at"),
+    supabase.from("active_users").select("blocked,expires_at"),
+  ]);
+  const keys = keyRows || [];
+  const users = userRows || [];
+  const now = Date.now();
+  const expired = keys.filter(
+    (k: any) => k.status === "Expirada" || (k.expires_at && new Date(k.expires_at).getTime() <= now),
+  ).length;
+  const used = keys.filter((k: any) => k.status === "Usada").length;
+  const active = users.filter(
+    (u: any) => !u.blocked && (!u.expires_at || new Date(u.expires_at).getTime() > now),
+  ).length;
+  return {
+    text:
+      `*️⃣ <b>Full Statistics</b>\n\n` +
+      `Active Users: ${active}\n` +
+      `Total Generated Passwords: ${keys.length}\n` +
+      `Expired Passwords: ${expired}\n` +
+      `Used Passwords: ${used}`,
+    inline: [NAV_ROW],
+  };
+}
+
+function homeText() {
+  return "<b>Boykaffx7 — Panel</b>\n\nUsa la barra inferior.";
+}
+
+// ---------- text handler ----------
+async function handleText(supabase: any, chat_id: number, text: string, adminId: string) {
   const trimmed = text.trim();
 
-  // Auth gate
+  if (!isAllowedAdmin(chat_id, adminId)) {
+    await tg("sendMessage", { chat_id, text: "Acceso denegado.", reply_markup: { remove_keyboard: true } });
+    return;
+  }
+
   const authed = await isAuthed(supabase, chat_id, adminId);
   if (!authed) {
-    if (!isAllowedAdmin(chat_id, adminId)) {
-      await tg("sendMessage", { chat_id, text: "Acceso denegado.", reply_markup: { remove_keyboard: true } });
-      return;
-    }
-    if (trimmed === "/start" || trimmed === "Inicio") {
-      await setPending(supabase, chat_id, { type: "auth" });
-      await tg("sendMessage", {
-        chat_id, parse_mode: "HTML",
-        text: "<b>Boykaffx7 Admin</b>\nIngresa la contraseña secreta para continuar:",
-        reply_markup: { remove_keyboard: true },
-      });
-      return;
-    }
-    if ((await getPending(supabase, chat_id))?.type === "auth" || ADMIN_PASSWORDS.includes(trimmed)) {
-      if (ADMIN_PASSWORDS.includes(trimmed)) {
-        await saveAuth(supabase, chat_id);
-        await clearPending(supabase, chat_id);
-        await reply(chat_id,
-          "<b>Acceso concedido</b>\n\nBienvenido al panel de Boykaffx7.\nUsa la barra inferior para todas las funciones.");
-        return;
-      }
-      await tg("sendMessage", { chat_id, text: "Contraseña incorrecta. Intenta de nuevo:" });
+    if (ADMIN_PASSWORDS.includes(trimmed.toLowerCase())) {
+      await saveAuth(supabase, chat_id);
+      await reply(chat_id, "<b>Acceso concedido</b>\n\n" + homeText());
       return;
     }
     await tg("sendMessage", {
-      chat_id, text: "Envía /start para iniciar.",
+      chat_id,
+      parse_mode: "HTML",
+      text: "<b>Boykaffx7 Admin</b>\nIngresa la contraseña secreta para continuar:",
       reply_markup: { remove_keyboard: true },
     });
     return;
   }
 
-  // Authed: handle pending interactive flows first
+  if (trimmed === "/start" || trimmed === "/inicio") {
+    await clearPending(supabase, chat_id);
+    await reply(chat_id, homeText());
+    return;
+  }
+
+  if (trimmed === BTN_GEN || trimmed.toLowerCase() === "/generar") {
+    const s = durationScreen();
+    const r = await send(chat_id, s.text, s.inline);
+    const j = r ? await r.json().catch(() => null) : null;
+    await setPending(supabase, chat_id, {
+      screen: "duration",
+      message_id: j?.result?.message_id ?? null,
+    });
+    return;
+  }
+
+  if (trimmed === BTN_ACCOUNT || trimmed.toLowerCase() === "/usuarios") {
+    const s = await usersScreen(supabase, 0);
+    const r = await send(chat_id, s.text, s.inline);
+    const j = r ? await r.json().catch(() => null) : null;
+    await setPending(supabase, chat_id, { screen: "users", page: 0, message_id: j?.result?.message_id ?? null });
+    return;
+  }
+
+  if (trimmed === BTN_STATS || trimmed.toLowerCase() === "/stats") {
+    const s = await statsScreen(supabase);
+    const r = await send(chat_id, s.text, s.inline);
+    const j = r ? await r.json().catch(() => null) : null;
+    await setPending(supabase, chat_id, { screen: "stats", message_id: j?.result?.message_id ?? null });
+    return;
+  }
+
+  // Password count input
   const p = await getPending(supabase, chat_id);
-  if (p?.type === "gen_type") {
-    const t = trimmed.toLowerCase();
-    if (t.includes("cancelar")) {
-      await clearPending(supabase, chat_id);
-      await reply(chat_id, "Cancelado.");
-      return;
-    }
-    if (t !== "normal" && t !== "premium") {
-      await reply(chat_id, "Elige <b>Normal</b> o <b>Premium</b>.");
-      return;
-    }
-    await setPending(supabase, chat_id, { type: "gen_duration", data: { type: t === "premium" ? "Premium" : "Normal" } });
-    await tg("sendMessage", {
-      chat_id, parse_mode: "HTML",
-      text: "Duración:",
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "1 día", callback_data: "gdur:1 día" }, { text: "7 días", callback_data: "gdur:7 días" }],
-          [{ text: "30 días", callback_data: "gdur:30 días" }, { text: "1 minuto", callback_data: "gdur:1 minuto" }],
-          [{ text: "Cancelar", callback_data: "gcancel:x" }],
-        ],
-      },
-    });
-    return;
-  }
-  if (p?.type === "gen_duration") {
-    if (trimmed.includes("Cancelar")) {
-      await clearPending(supabase, chat_id);
-      await reply(chat_id, "Cancelado.");
-      return;
-    }
-    if (!DURATION_MS[trimmed]) {
-      await reply(chat_id, "Duración inválida.");
-      return;
-    }
-    await setPending(supabase, chat_id, { type: "gen_quantity", data: { type: p.data.type, duration: trimmed } });
-    await tg("sendMessage", {
-      chat_id, parse_mode: "HTML",
-      text: "Cantidad de keys (1-100). Toca un número o escríbelo:",
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "1", callback_data: "gqty:1" }, { text: "5", callback_data: "gqty:5" }, { text: "10", callback_data: "gqty:10" }],
-          [{ text: "25", callback_data: "gqty:25" }, { text: "50", callback_data: "gqty:50" }, { text: "100", callback_data: "gqty:100" }],
-          [{ text: "Cancelar", callback_data: "gcancel:x" }],
-        ],
-      },
-    });
-    return;
-  }
-  if (p?.type === "gen_quantity") {
-    if (trimmed.includes("Cancelar")) {
-      await clearPending(supabase, chat_id);
-      await reply(chat_id, "Cancelado.");
-      return;
-    }
+  if (p?.screen === "count" && p.message_id) {
     const quantity = Number(trimmed);
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100) {
-      await reply(chat_id, "Cantidad inválida. Escribe un número entre 1 y 100.");
+      await edit(chat_id, p.message_id, "❇️ <b>Password Count</b>\n\nCantidad inválida. Envía un número entre 1 y 100.", [NAV_ROW]);
       return;
     }
-    const keys = await createKeys(supabase, p.data.type, p.data.duration, quantity);
-    await clearPending(supabase, chat_id);
-    await reply(chat_id,
-      `<b>${keys.length} key${keys.length === 1 ? "" : "s"} generada${keys.length === 1 ? "" : "s"}</b>\n\nTipo: ${p.data.type}\nDuración: ${p.data.duration}\n${keys.map((key) => `<code>${key}</code>`).join("\n")}`);
+    const keys = await createKeys(supabase, p.duration, quantity);
+    const s = resultScreen(keys);
+    await edit(chat_id, p.message_id, s.text, s.inline);
+    await setPending(supabase, chat_id, {
+      screen: "result",
+      message_id: p.message_id,
+      duration: p.duration,
+      keys,
+    });
+    await tg("deleteMessage", { chat_id, message_id: -1 }).catch?.(() => {});
     return;
   }
 
-  // Button shortcuts
-  switch (trimmed) {
-    case "Inicio":
-    case "/inicio":
-      await reply(chat_id, "<b>Boykaffx7 — Panel principal</b>\nElige una opción de la barra inferior.");
-      return;
-    case "Ayuda":
-    case "/help":
-    case "/start":
-      await reply(chat_id, helpText());
-      return;
-    case "Generar Key":
-    case "Generar Contraseña":
-    case "Generar contraseña":
-    case "/generar": {
-      const direct = trimmed.match(/^\/generar\s+(Normal|Premium)\s+(.+?)\s+(\d+)$/i);
-      if (direct) {
-        const type = direct[1].toLowerCase() === "premium" ? "Premium" : "Normal";
-        const duration = direct[2].trim();
-        const quantity = Number(direct[3]);
-        if (!DURATION_MS[duration]) { await reply(chat_id, "Duración inválida. Usa: 1 minuto, 1 día, 7 días o 30 días."); return; }
-        const keys = await createKeys(supabase, type, duration, quantity);
-        await reply(chat_id, `<b>${keys.length} keys generadas</b>\nTipo: ${type}\nDuración: ${duration}\n\n${keys.map((k) => `<code>${k}</code>`).join("\n")}`);
-        return;
-      }
-      await setPending(supabase, chat_id, { type: "gen_type" });
-      await tg("sendMessage", {
-        chat_id, parse_mode: "HTML",
-        text: "<b>Generar Key</b>\nTipo de key:",
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: "Normal", callback_data: "gtype:Normal" }, { text: "Premium", callback_data: "gtype:Premium" }],
-            [{ text: "Cancelar", callback_data: "gcancel:x" }],
-          ],
-        },
-      });
-      return;
-    }
-    case "Keys activas":
-    case "/keys": {
-      const { data } = await supabase.from("proxy_keys").select("key,duration,type,status,used_by,expires_at").order("created_at", { ascending: false }).limit(80);
-      const counts: Record<string, number> = {};
-      (data || []).filter((k: any) => k.status === "Activa").forEach((k: any) => {
-        const label = `${k.type} · ${k.duration}`;
-        counts[label] = (counts[label] || 0) + 1;
-      });
-      const summary = Object.entries(counts).map(([d, n]) => `• ${d}: <b>${n}</b>`).join("\n") || "Sin keys disponibles.";
-      const latest = (data || []).slice(0, 20).map((k: any) => `<code>${k.key}</code> · ${k.type} · ${k.duration} · ${k.status}${k.used_by ? ` · ${k.used_by}` : ""}`).join("\n");
-      await reply(chat_id, `<b>Keys disponibles</b>\n${summary}\n\n<b>Últimas keys</b>\n${latest || "Sin keys."}`);
-      return;
-    }
-    case "Usuarios":
-    case "/usuarios": {
-      const { data } = await supabase.from("active_users").select("*").order("login_at", { ascending: false }).limit(30);
-      const txt = (data || []).map((u: any) =>
-        `<b>${u.name}</b> ${u.blocked ? "[BLOQUEADO]" : "[ONLINE]"}\n<code>${u.key}</code> · ${u.type} · ${timeLeft(u.expires_at)}`
-      ).join("\n\n") || "Sin sesiones activas.";
-      await reply(chat_id, `<b>Usuarios activos (${data?.length || 0})</b>\n${txt}`);
-      return;
-    }
-    case "Pendientes":
-    case "/pendientes": {
-      const { data } = await supabase.from("payment_orders").select("*")
-        .eq("status", "PENDING").order("created_at", { ascending: false }).limit(15);
-      if (!data?.length) { await reply(chat_id, "Sin pedidos pendientes."); return; }
-      const txt = data.map((o: any) =>
-        `<code>${o.payment_id}</code> · ${o.alias} · ${o.duration} · ${o.amount_display || o.amount}`
-      ).join("\n");
-      await reply(chat_id, `<b>Pendientes (${data.length})</b>\n${txt}`);
-      return;
-    }
-    case "Últimos":
-    case "/ultimos": {
-      const { data } = await supabase.from("payment_orders").select("*")
-        .order("created_at", { ascending: false }).limit(10);
-      const txt = (data || []).map((o: any) =>
-        `<code>${o.payment_id}</code> [${o.status}] ${o.alias} ${o.duration}`
-      ).join("\n") || "Sin pedidos.";
-      await reply(chat_id, `<b>Últimos pedidos</b>\n${txt}`);
-      return;
-    }
-    case "Stats":
-    case "/stats": {
-      const [{ data }, { data: keyRows }, { data: userRows }] = await Promise.all([
-        supabase.from("payment_orders").select("status, amount, payment_method"),
-        supabase.from("proxy_keys").select("status"),
-        supabase.from("active_users").select("blocked"),
-      ]);
-      const all = data || [];
-      const keys = keyRows || [];
-      const users = userRows || [];
-      const by = (s: string) => all.filter((o: any) => o.status === s).length;
-      const keyBy = (s: string) => keys.filter((k: any) => k.status === s).length;
-      const totalUsd = all.filter((o: any) => o.status === "APPROVED" && o.payment_method === "paypal")
-        .reduce((s: number, o: any) => s + Number(o.amount), 0);
-      const totalDia = all.filter((o: any) => o.status === "APPROVED" && o.payment_method === "diamonds")
-        .reduce((s: number, o: any) => s + Number(o.amount), 0);
-      await reply(chat_id,
-        `<b>Estadísticas</b>\n` +
-        `Keys: ${keys.length} · Activas: ${keyBy("Activa")} · Usadas: ${keyBy("Usada")} · Expiradas: ${keyBy("Expirada")}\n` +
-        `Usuarios: ${users.length} · Online: ${users.filter((u: any) => !u.blocked).length} · Bloqueados: ${users.filter((u: any) => u.blocked).length}\n\n` +
-        `Aprobados: ${by("APPROVED")}\nPendientes: ${by("PENDING")}\n` +
-        `Rechazados: ${by("REJECTED")}\nEsperando: ${by("AWAITING_RECEIPT")}\n` +
-        `Total: ${all.length}\n\nIngresos PayPal: $${totalUsd}\nDiamantes: ${totalDia}`);
-      return;
-    }
-    case "/logout":
-      await clearAuth(supabase, chat_id);
-      await clearPending(supabase, chat_id);
-      await tg("sendMessage", { chat_id, text: "Sesión cerrada.", reply_markup: { remove_keyboard: true } });
-      return;
+  await reply(chat_id, homeText());
+}
+
+// ---------- callback handler ----------
+async function handleCallback(supabase: any, cb: any, adminId: string) {
+  const chat_id = Number(cb.message?.chat?.id);
+  const message_id = Number(cb.message?.message_id);
+  const data: string = cb.data || "";
+  const [action, rest] = [data.split(":")[0], data.slice(data.indexOf(":") + 1)];
+
+  if (!(await isAuthed(supabase, chat_id, adminId))) {
+    await ack(cb.id, "Envía /start y autentícate.");
+    return;
   }
 
-  // Parameterized commands
-  const [cmd, ...args] = trimmed.split(/\s+/);
-  switch (cmd.toLowerCase()) {
-    case "/generar": {
-      const typeArg = args[0]?.toLowerCase();
-      const quantityArg = args[args.length - 1];
-      const duration = args.slice(1, -1).join(" ");
-      const type = typeArg === "premium" ? "Premium" : typeArg === "normal" ? "Normal" : "";
-      const quantity = Number(quantityArg);
-      if (!type || !DURATION_MS[duration] || !Number.isInteger(quantity)) {
-        await reply(chat_id, "Uso: /generar Normal 7 días 5");
-        return;
-      }
-      const keys = await createKeys(supabase, type, duration, quantity);
-      await reply(chat_id, `<b>${keys.length} keys generadas</b>\nTipo: ${type}\nDuración: ${duration}\n\n${keys.map((k) => `<code>${k}</code>`).join("\n")}`);
+  const p = (await getPending(supabase, chat_id)) || {};
+
+  if (action === "nav") {
+    if (rest === "home") {
+      await ack(cb.id);
+      await edit(chat_id, message_id, homeText(), []);
+      await clearPending(supabase, chat_id);
       return;
     }
-    case "/eliminarkey": {
-      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /eliminarkey KEY"); return; }
-      await supabase.from("proxy_keys").delete().ilike("key", key);
-      await reply(chat_id, `Key eliminada: <code>${key}</code>`);
+    // back
+    await ack(cb.id);
+    if (p.screen === "count") {
+      const s = durationScreen();
+      await edit(chat_id, message_id, s.text, s.inline);
+      await setPending(supabase, chat_id, { screen: "duration", message_id });
       return;
     }
-    case "/bloquear": {
-      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /bloquear KEY"); return; }
-      await supabase.from("active_users").update({ blocked: true }).ilike("key", key);
-      await reply(chat_id, `Usuario bloqueado: <code>${key}</code>`);
+    if (p.screen === "result") {
+      const s = countScreen(p.duration || "");
+      await edit(chat_id, message_id, s.text, s.inline);
+      await setPending(supabase, chat_id, { screen: "count", message_id, duration: p.duration });
       return;
     }
-    case "/desbloquear": {
-      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /desbloquear KEY"); return; }
-      await supabase.from("active_users").update({ blocked: false }).ilike("key", key);
-      await reply(chat_id, `Usuario desbloqueado: <code>${key}</code>`);
+    if (p.screen === "user") {
+      const s = await usersScreen(supabase, p.page || 0);
+      await edit(chat_id, message_id, s.text, s.inline);
+      await setPending(supabase, chat_id, { screen: "users", page: p.page || 0, message_id });
       return;
     }
-    case "/sacar": {
-      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /sacar KEY"); return; }
-      await supabase.from("active_users").delete().ilike("key", key);
-      await reply(chat_id, `Sesión removida: <code>${key}</code>`);
-      return;
-    }
-    case "/eliminarusuario": {
-      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /eliminarusuario KEY"); return; }
-      await supabase.from("active_users").delete().ilike("key", key);
-      await supabase.from("proxy_keys").delete().ilike("key", key);
-      await reply(chat_id, `Usuario y key eliminados: <code>${key}</code>`);
-      return;
-    }
-    case "/sumar":
-    case "/reducir": {
-      const key = cleanKey(args[0]);
-      const amount = args[1]?.toLowerCase();
-      const ms = ADD_TIME_MS[amount];
-      if (!key || !ms) { await reply(chat_id, `Uso: ${cmd.toLowerCase()} KEY 1h\nOpciones: 30m, 1h, 6h, 12h, 1d, 7d`); return; }
-      await reply(chat_id, await changeKeyTime(supabase, key, cmd.toLowerCase() === "/reducir" ? -ms : ms));
-      return;
-    }
-    case "/buscar": {
-      const id = args[0]; if (!id) { await reply(chat_id, "Uso: /buscar HG-XXXX"); return; }
-      const { data: o } = await supabase.from("payment_orders").select("*").eq("payment_id", id).maybeSingle();
-      if (!o) {
-        const { data: k } = await supabase.from("proxy_keys").select("*").ilike("key", cleanKey(id)).maybeSingle();
-        if (!k) { await reply(chat_id, "No encontrado."); return; }
-        await reply(chat_id, `<b>Key</b>\n<code>${k.key}</code>\nTipo: ${k.type}\nEstado: <b>${k.status}</b>\nDuración: ${k.duration}\nUsuario: ${k.used_by || "—"}\nRestante: ${timeLeft(k.expires_at)}`);
-        return;
-      }
-      await reply(chat_id,
-        `<b>${o.payment_id}</b>\nUsuario: ${o.alias}\nEmail: ${o.email || "—"}\n` +
-        `Plan: ${o.duration} · ${o.amount_display || o.amount}\nMétodo: ${o.payment_method}\n` +
-        `Estado: <b>${o.status}</b>\nKey: <code>${o.assigned_key || "—"}</code>\n` +
-        `Fecha: ${new Date(o.created_at).toLocaleString("es-ES")}`);
-      return;
-    }
-    case "/reenviarkey": {
-      const id = args[0]; if (!id) { await reply(chat_id, "Uso: /reenviarkey HG-XXXX"); return; }
-      const { data: o } = await supabase.from("payment_orders").select("*").eq("payment_id", id).maybeSingle();
-      if (!o) { await reply(chat_id, "Pedido no encontrado."); return; }
-      if (o.status !== "APPROVED" || !o.assigned_key) { await reply(chat_id, "Pedido no aprobado o sin key."); return; }
-      await supabase.from("payment_logs").insert({
-        payment_id: o.payment_id, event: "resend_key",
-        detail: { key: o.assigned_key, email: o.email },
-      });
-      await reply(chat_id, `Key reenviada para <b>${o.alias}</b>:\n<code>${o.assigned_key}</code>`);
-      return;
-    }
-    case "/aprobar": {
-      const id = args[0]; if (!id) { await reply(chat_id, "Uso: /aprobar HG-XXXX"); return; }
-      const { data: o } = await supabase.from("payment_orders").select("*").eq("payment_id", id).maybeSingle();
-      if (!o) { await reply(chat_id, "No encontrado."); return; }
-      if (o.status === "APPROVED") { await reply(chat_id, `Ya aprobado. Key: <code>${o.assigned_key}</code>`); return; }
-      const key = await generateKeyForOrder(supabase, o);
-      await supabase.from("payment_orders").update({ status: "APPROVED", assigned_key: key, rejection_reason: null }).eq("id", o.id);
-      await reply(chat_id, `Aprobado <code>${o.payment_id}</code>\nKey: <code>${key}</code>`);
-      return;
-    }
-    case "/rechazar": {
-      const id = args[0]; if (!id) { await reply(chat_id, "Uso: /rechazar HG-XXXX [motivo]"); return; }
-      const reason = args.slice(1).join(" ") || "Rechazado por administrador";
-      const { data: o } = await supabase.from("payment_orders").select("*").eq("payment_id", id).maybeSingle();
-      if (!o) { await reply(chat_id, "No encontrado."); return; }
-      await supabase.from("payment_orders").update({ status: "REJECTED", rejection_reason: reason }).eq("id", o.id);
-      await supabase.from("payment_logs").insert({ payment_id: id, event: "rejected", detail: { reason } });
-      await deleteReceipt(supabase, o);
-      if (o.telegram_message_id) { try { await deleteMessage(Number(adminId), Number(o.telegram_message_id)); } catch {} }
-      await reply(chat_id, `Rechazado <code>${id}</code>\nComprobante eliminado.\nMotivo: ${reason}`);
-      return;
-    }
-    case "/cancelar": {
-      const id = args[0]; if (!id) { await reply(chat_id, "Uso: /cancelar HG-XXXX"); return; }
-      await supabase.from("payment_orders").update({ status: "REJECTED", rejection_reason: "Cancelado por admin" }).eq("payment_id", id);
-      await reply(chat_id, `Cancelado <code>${id}</code>`);
-      return;
-    }
-    case "/logs": {
-      const id = args[0]; if (!id) { await reply(chat_id, "Uso: /logs HG-XXXX"); return; }
-      const { data } = await supabase.from("payment_logs").select("*")
-        .eq("payment_id", id).order("created_at", { ascending: false }).limit(15);
-      const txt = (data || []).map((l: any) =>
-        `${new Date(l.created_at).toLocaleTimeString("es-ES")} · ${l.event}`
-      ).join("\n") || "Sin logs.";
-      await reply(chat_id, `<b>Logs ${id}</b>\n${txt}`);
-      return;
-    }
-    default:
-      await reply(chat_id, "No reconozco eso. Usa la barra inferior o /help.");
+    await edit(chat_id, message_id, homeText(), []);
+    await clearPending(supabase, chat_id);
+    return;
   }
+
+  if (action === "dur") {
+    const s = countScreen(rest);
+    await ack(cb.id, rest);
+    await edit(chat_id, message_id, s.text, s.inline);
+    await setPending(supabase, chat_id, { screen: "count", message_id, duration: rest });
+    return;
+  }
+
+  if (action === "copy") {
+    await ack(cb.id, "Copiado");
+    const keys: string[] = p.keys || [];
+    if (keys.length) {
+      await tg("sendMessage", { chat_id, text: keys.join("\n") });
+    }
+    return;
+  }
+
+  if (action === "upage") {
+    const page = Number(rest) || 0;
+    const s = await usersScreen(supabase, page);
+    await ack(cb.id);
+    await edit(chat_id, message_id, s.text, s.inline);
+    await setPending(supabase, chat_id, { screen: "users", page, message_id });
+    return;
+  }
+
+  if (action === "user") {
+    const s = await userDetailScreen(supabase, rest);
+    await ack(cb.id);
+    await edit(chat_id, message_id, s.text, s.inline);
+    await setPending(supabase, chat_id, { screen: "user", page: p.page || 0, message_id });
+    return;
+  }
+
+  await ack(cb.id);
 }
 
 async function deriveSecret(token: string): Promise<string> {
@@ -604,115 +447,28 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-  // Process asynchronously so Telegram gets an instant 200 and NEVER retries/freezes.
   const process = async () => {
     const supabase = createClient(supabaseUrl, serviceKey);
     try {
       if (update.message?.text) {
-        await handleTextOrCommand(supabase, update.message.chat.id, update.message.text, adminId);
-        return;
-      }
-      const cb = update.callback_query;
-      if (!cb) return;
-
-      const data: string = cb.data || "";
-      const [action, paymentId] = data.split(":");
-      const chat_id = cb.message?.chat?.id;
-      const message_id = cb.message?.message_id;
-
-      if (!(await isAuthed(supabase, Number(chat_id), adminId))) {
-        await ack(cb.id, "Envía /start y autentícate primero.");
-        return;
-      }
-
-      // Flujo de generación de keys por botones en línea (la barra inferior nunca cambia)
-      if (action === "gcancel") {
-        await clearPending(supabase, Number(chat_id));
-        await ack(cb.id, "Cancelado");
-        await tg("editMessageText", { chat_id, message_id, text: "Operación cancelada." });
-        return;
-      }
-      if (action === "gtype") {
-        await setPending(supabase, Number(chat_id), { type: "gen_duration", data: { type: paymentId } });
-        await ack(cb.id, paymentId);
-        await tg("editMessageText", {
-          chat_id, message_id, parse_mode: "HTML",
-          text: `<b>Generar Key</b>\nTipo: ${paymentId}\nDuración:`,
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: "1 día", callback_data: "gdur:1 día" }, { text: "7 días", callback_data: "gdur:7 días" }],
-              [{ text: "30 días", callback_data: "gdur:30 días" }, { text: "1 minuto", callback_data: "gdur:1 minuto" }],
-              [{ text: "Cancelar", callback_data: "gcancel:x" }],
-            ],
-          },
-        });
-        return;
-      }
-      if (action === "gdur") {
-        const duration = data.slice(action.length + 1);
-        const pend = await getPending(supabase, Number(chat_id));
-        const type = pend?.data?.type || "Normal";
-        await setPending(supabase, Number(chat_id), { type: "gen_quantity", data: { type, duration } });
-        await ack(cb.id, duration);
-        await tg("editMessageText", {
-          chat_id, message_id, parse_mode: "HTML",
-          text: `<b>Generar Key</b>\nTipo: ${type}\nDuración: ${duration}\nCantidad:`,
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: "1", callback_data: "gqty:1" }, { text: "5", callback_data: "gqty:5" }, { text: "10", callback_data: "gqty:10" }],
-              [{ text: "25", callback_data: "gqty:25" }, { text: "50", callback_data: "gqty:50" }, { text: "100", callback_data: "gqty:100" }],
-              [{ text: "Cancelar", callback_data: "gcancel:x" }],
-            ],
-          },
-        });
-        return;
-      }
-      if (action === "gqty") {
-        const pend = await getPending(supabase, Number(chat_id));
-        const type = pend?.data?.type || "Normal";
-        const duration = pend?.data?.duration || "1 día";
-        const quantity = Math.max(1, Math.min(100, Number(paymentId) || 1));
-        const keys = await createKeys(supabase, type, duration, quantity);
-        await clearPending(supabase, Number(chat_id));
-        await ack(cb.id, `${keys.length} keys`);
-        await tg("editMessageText", {
-          chat_id, message_id, parse_mode: "HTML",
-          text: `<b>${keys.length} key${keys.length === 1 ? "" : "s"} generada${keys.length === 1 ? "" : "s"}</b>\nTipo: ${type}\nDuración: ${duration}\n\n${keys.map((k: string) => `<code>${k}</code>`).join("\n")}`,
-        });
-        return;
-      }
-
-      const { data: order } = await supabase.from("payment_orders").select("*").eq("payment_id", paymentId).maybeSingle();
-      if (!order) { await ack(cb.id, "No encontrado"); return; }
-
-      if (action === "approve") {
-        if (order.status === "APPROVED") { await ack(cb.id, "Ya aprobado"); return; }
-        const key = await generateKeyForOrder(supabase, order);
-        await supabase.from("payment_orders").update({ status: "APPROVED", assigned_key: key, rejection_reason: null }).eq("id", order.id);
-        await editCaption(chat_id, message_id,
-          `<b>APROBADO</b>\nID: <code>${order.payment_id}</code>\nUsuario: ${order.alias}\nPlan: ${order.duration}\nKey: <code>${key}</code>`);
-        await ack(cb.id, "Aprobado");
-      } else if (action === "reject") {
-        await supabase.from("payment_orders").update({ status: "REJECTED", rejection_reason: "Rechazado por administrador" }).eq("id", order.id);
-        await deleteReceipt(supabase, order);
-        await ack(cb.id, "Rechazado");
-        try { await deleteMessage(chat_id, message_id); } catch {}
-      } else if (action === "info") {
-        await ack(cb.id,
-          `${order.alias} · ${order.duration} · ${order.amount_display || order.amount} · ${order.email || "sin email"}`);
+        await handleText(supabase, update.message.chat.id, update.message.text, adminId);
+      } else if (update.callback_query) {
+        await handleCallback(supabase, update.callback_query, adminId);
       }
     } catch (e) {
-      console.error("processing error", e);
+      console.error("process error", e);
+      try {
+        const cid = update.message?.chat?.id || update.callback_query?.message?.chat?.id;
+        if (cid) await reply(Number(cid), "Ocurrió un error. Intenta de nuevo.");
+      } catch {}
     }
   };
 
-  // @ts-ignore EdgeRuntime.waitUntil keeps the task alive after response is returned.
-  if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
-    // @ts-ignore
-    EdgeRuntime.waitUntil(process());
-  } else {
-    process();
-  }
+  // @ts-ignore EdgeRuntime is available in Supabase edge functions
+  if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(process());
+  else await process();
 
-  return new Response("ok", { headers: corsHeaders });
+  return new Response(JSON.stringify({ ok: true }), {
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 });
