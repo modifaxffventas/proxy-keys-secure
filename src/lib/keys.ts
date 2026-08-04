@@ -188,11 +188,13 @@ export async function activateKey(inputKey: string, userName: string): Promise<P
   // Sanitize: strip invisible chars and whitespace, uppercase
   const clean = inputKey.replace(/[\u200B-\u200D\uFEFF\s]/g, '').trim().toUpperCase();
   if (!clean) return null;
+  // Solo keys con el formato generado desde /admin o el bot (10 dígitos)
+  if (!/^\d{10}$/.test(clean)) return null;
 
   const { data, error } = await supabase
     .from('proxy_keys')
     .select('*')
-    .ilike('key', clean)
+    .eq('key', clean)
     .maybeSingle();
 
   if (error || !data) return null;
