@@ -577,10 +577,11 @@ const ProxyConfig = () => {
             >
               <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
                 <iframe
-                  src="https://www.youtube.com/embed/lIzxrp9NwHo?autoplay=1&mute=1&loop=1&playlist=lIzxrp9NwHo&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0"
-                  title="Tutorial DEX"
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                  allow="autoplay; encrypted-media"
+                  src="https://www.youtube.com/embed/lIzxrp9NwHo?rel=0&modestbranding=1&playsinline=1&fs=1&vq=hd1080&hd=1&controls=1&iv_load_policy=3"
+                  title="Tutorial DEX Injector"
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                  allowFullScreen
                   frameBorder={0}
                 />
               </div>
@@ -1142,10 +1143,10 @@ const ProxyConfig = () => {
             >
               <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
                 <iframe
-                  src="https://www.youtube.com/embed/7NPGvAlQS3w?rel=0&modestbranding=1"
-                  title="Tutorial"
+                  src="https://www.youtube.com/embed/lIzxrp9NwHo?rel=0&modestbranding=1&playsinline=1&fs=1&vq=hd1080&hd=1&controls=1&iv_load_policy=3"
+                  title="Tutorial DEX Injector"
                   className="absolute inset-0 w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                   allowFullScreen
                 />
               </div>
