@@ -5,9 +5,8 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
 import { Shield, Lock, Globe, User, KeyRound, PlayCircle } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO, EXAMPLE_VIDEO, RAVE_MASCOT } from "@/lib/assets";
+import { RAVE_LOGO, EXAMPLE_VIDEO, RAVE_MASCOT, TITLE_LOGO } from "@/lib/assets";
 import { useI18n, LANGUAGES } from "@/lib/i18n";
-import panelsLogo from "@/assets/panels-logo.png.asset.json";
 
 
 const Login = () => {
@@ -96,7 +95,7 @@ const Login = () => {
           </div>
           <div className="flex items-center justify-center gap-1.5 mb-1 w-full">
             <img
-              src={panelsLogo.url}
+              src={TITLE_LOGO}
               alt="Boykaffx7"
               className="w-[min(78%,260px)] h-auto object-contain"
               style={{ filter: "drop-shadow(0 6px 18px rgba(200,20,20,0.35))" }}
