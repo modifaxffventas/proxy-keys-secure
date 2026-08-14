@@ -144,7 +144,7 @@ input[type="range"]:active::-moz-range-thumb {
 
 /* DEX locked modules — red tint until DEX Injector is activated */
 .dex-locked-group {
-  filter: hue-rotate(-160deg) saturate(1.15);
+  filter: grayscale(0.35) brightness(0.85);
   transition: filter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .dex-locked-group > div > div {

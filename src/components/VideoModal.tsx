@@ -66,9 +66,9 @@ const VideoModal = ({ open, onClose, src, title = "Reproductor" }: Props) => {
         <div
           className="relative rounded-2xl overflow-hidden bg-black"
           style={{
-            border: "1px solid rgba(120,190,255,0.35)",
+            border: "1px solid rgba(255,150,150,0.35)",
             boxShadow:
-              "0 0 0 1px rgba(29,155,240,0.18) inset, 0 10px 40px -8px rgba(29,155,240,0.45), 0 20px 60px rgba(0,0,0,0.55)",
+              "0 0 0 1px rgba(220,38,38,0.18) inset, 0 10px 40px -8px rgba(220,38,38,0.45), 0 20px 60px rgba(0,0,0,0.55)",
           }}
         >
           <div className="relative aspect-[9/16]">
