@@ -92,22 +92,17 @@ const Login = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 mb-1">
-            <h1
-              className="text-3xl font-bold tracking-tight"
-              style={{
-                fontFamily: "'Space Grotesk', system-ui, sans-serif",
-                background: "linear-gradient(180deg, #ffffff 0%, #9fd0ff 60%, #4db8ff 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              Boykaffx7
-            </h1>
+          <div className="flex items-center justify-center gap-1.5 mb-1 w-full">
+            <img
+              src={panelsLogo.url}
+              alt="Boykaffx7"
+              className="w-[min(78%,260px)] h-auto object-contain"
+              style={{ filter: "drop-shadow(0 6px 18px rgba(0,120,255,0.35))" }}
+              draggable={false}
+            />
             <VerifiedBadge size={20} />
           </div>
+
           <p className="text-[10px] text-muted-foreground/70 tracking-widest uppercase">{t("secureGateway")}</p>
         </div>
 
