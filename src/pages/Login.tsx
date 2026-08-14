@@ -5,9 +5,8 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
 import { Shield, Lock, Globe, User, KeyRound, PlayCircle } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO, EXAMPLE_VIDEO, RAVE_MASCOT } from "@/lib/assets";
+import { RAVE_LOGO, EXAMPLE_VIDEO, RAVE_MASCOT, TITLE_LOGO } from "@/lib/assets";
 import { useI18n, LANGUAGES } from "@/lib/i18n";
-import panelsLogo from "@/assets/panels-logo.png.asset.json";
 
 
 const Login = () => {
