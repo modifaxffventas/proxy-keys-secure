@@ -422,8 +422,8 @@ const ProxyConfig = () => {
           <div
             className="p-[2px] rounded-full"
             style={{
-              background: "conic-gradient(from 0deg, #00b8ff, #4ddcff, #0066ff, #00b8ff)",
-              boxShadow: "0 0 14px rgba(0,184,255,0.5)",
+              background: "conic-gradient(from 0deg, #ff3b3b, #ff7a7a, #a30d0d, #ff3b3b)",
+              boxShadow: "0 0 14px rgba(239,68,68,0.5)",
             }}
           >
             <img src={defaultAvatar.url} alt="Avatar" className="w-10 h-10 rounded-full object-cover bg-black block" />
@@ -520,9 +520,9 @@ const ProxyConfig = () => {
       <div
         className="relative rounded-2xl overflow-hidden animate-fade-in-up"
         style={{
-          border: "2px solid #1d9bf0",
+          border: "2px solid #e11d1d",
           boxShadow:
-            "0 0 0 1px rgba(29,155,240,0.35) inset, 0 10px 28px -8px rgba(29,155,240,0.55), 0 0 24px rgba(29,155,240,0.25)",
+            "0 0 0 1px rgba(220,38,38,0.35) inset, 0 10px 28px -8px rgba(220,38,38,0.55), 0 0 24px rgba(220,38,38,0.25)",
           background: "#000",
         }}
       >
@@ -565,7 +565,7 @@ const ProxyConfig = () => {
         {dexInjector && (
           <div className="pt-3 space-y-2 animate-fade-in-up">
             <div className="flex items-center gap-2">
-              <Bolt className="w-3.5 h-3.5 text-sky-300" />
+              <Bolt className="w-3.5 h-3.5 text-red-300" />
               <span className="text-[11px] text-muted-foreground font-semibold tracking-wide uppercase">Tutorial DEX</span>
             </div>
             <div
@@ -600,9 +600,9 @@ const ProxyConfig = () => {
               }}
               className="w-full py-3 rounded-xl text-sm font-bold tracking-wide text-white active:scale-[0.98] transition-all"
               style={{
-                background: "linear-gradient(135deg, #0a2a55 0%, #0b6fd1 55%, #1d9bf0 100%)",
-                border: "1px solid rgba(120,190,255,0.55)",
-                boxShadow: "0 0 0 1px rgba(29,155,240,0.25) inset, 0 12px 28px -8px rgba(29,155,240,0.65)",
+                background: "linear-gradient(135deg, #3a0606 0%, #8f1010 55%, #e11d1d 100%)",
+                border: "1px solid rgba(255,150,150,0.55)",
+                boxShadow: "0 0 0 1px rgba(220,38,38,0.25) inset, 0 12px 28px -8px rgba(220,38,38,0.65)",
               }}
             >
               Proxy.vin
@@ -624,8 +624,8 @@ const ProxyConfig = () => {
             <div
               className="p-[3px] rounded-full"
               style={{
-                background: "conic-gradient(from 0deg, #00b8ff, #4ddcff, #0066ff, #00b8ff, #1e90ff)",
-                boxShadow: "0 0 24px rgba(0,184,255,0.55)",
+                background: "conic-gradient(from 0deg, #ff3b3b, #ff7a7a, #a30d0d, #ff3b3b, #ff4d4d)",
+                boxShadow: "0 0 24px rgba(239,68,68,0.55)",
               }}
             >
               <img src={defaultAvatar.url} alt="Avatar" className="w-20 h-20 rounded-full object-cover bg-black block" />
@@ -749,7 +749,7 @@ const ProxyConfig = () => {
         <div className="bg-secondary/20 rounded-lg p-3 border border-border/30 font-mono text-[9px] space-y-1.5 max-h-60 overflow-y-auto">
           <p><span className="text-emerald-400">[{new Date().toLocaleTimeString()}]</span> <span className="text-foreground/60">Sesión iniciada — {session.name}</span></p>
           <p><span className="text-emerald-400">[{new Date(Date.now() - 120000).toLocaleTimeString()}]</span> <span className="text-foreground/60">TLS handshake OK</span></p>
-          <p><span className="text-blue-400">[{new Date(Date.now() - 300000).toLocaleTimeString()}]</span> <span className="text-foreground/60">DNS → 1.1.1.1 (3ms)</span></p>
+          <p><span className="text-red-400">[{new Date(Date.now() - 300000).toLocaleTimeString()}]</span> <span className="text-foreground/60">DNS → 1.1.1.1 (3ms)</span></p>
           <p><span className="text-amber-400">[{new Date(Date.now() - 900000).toLocaleTimeString()}]</span> <span className="text-foreground/60">Auto-reconnect</span></p>
         </div>
       ),
@@ -873,7 +873,7 @@ const ProxyConfig = () => {
         <div
           key={n}
           className="tick-digit text-2xl font-bold tabular-nums text-white leading-none"
-          style={{ textShadow: "0 2px 12px rgba(0,120,255,0.55)" }}
+          style={{ textShadow: "0 2px 12px rgba(200,20,20,0.55)" }}
         >
           {String(n).padStart(2, "0")}
         </div>
@@ -894,7 +894,7 @@ const ProxyConfig = () => {
           style={{
             border: "2px solid #000",
             boxShadow:
-              "0 0 0 1px rgba(0,0,0,0.9), 0 20px 50px -12px rgba(0,0,0,0.75), 0 0 30px rgba(29,155,240,0.18)",
+              "0 0 0 1px rgba(0,0,0,0.9), 0 20px 50px -12px rgba(0,0,0,0.75), 0 0 30px rgba(220,38,38,0.18)",
           }}
         >
           {/* Video background — loops forever, no controls */}
@@ -924,8 +924,8 @@ const ProxyConfig = () => {
               <div
                 className="p-[2px] rounded-full animate-soft-float"
                 style={{
-                  background: "conic-gradient(from 0deg, #00b8ff, #4ddcff, #0066ff, #00b8ff)",
-                  boxShadow: "0 0 18px rgba(0,184,255,0.6)",
+                  background: "conic-gradient(from 0deg, #ff3b3b, #ff7a7a, #a30d0d, #ff3b3b)",
+                  boxShadow: "0 0 18px rgba(239,68,68,0.6)",
                 }}
               >
                 <img src={RAVE_LOGO} alt="" className="w-12 h-12 rounded-full object-cover bg-black block" />
@@ -959,8 +959,8 @@ const ProxyConfig = () => {
               className="rounded-2xl p-4 border border-white/15"
               style={{
                 background:
-                  "linear-gradient(135deg, rgba(29,155,240,0.18), rgba(0,50,120,0.28))",
-                boxShadow: "inset 0 0 0 1px rgba(120,190,255,0.12)",
+                  "linear-gradient(135deg, rgba(220,38,38,0.18), rgba(90,0,0,0.28))",
+                boxShadow: "inset 0 0 0 1px rgba(255,150,150,0.12)",
               }}
             >
               <p className="text-[9px] uppercase tracking-[0.22em] text-white/60 text-center mb-3">
@@ -985,8 +985,8 @@ const ProxyConfig = () => {
             <div
               className="p-[3px] rounded-full mb-4"
               style={{
-                background: "conic-gradient(from 0deg, #00b8ff, #4ddcff, #0066ff, #00b8ff, #1e90ff)",
-                boxShadow: "0 0 24px rgba(0,184,255,0.55)",
+                background: "conic-gradient(from 0deg, #ff3b3b, #ff7a7a, #a30d0d, #ff3b3b, #ff4d4d)",
+                boxShadow: "0 0 24px rgba(239,68,68,0.55)",
               }}
             >
               <img
@@ -1008,7 +1008,7 @@ const ProxyConfig = () => {
               rel="noopener noreferrer"
               className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-primary-foreground active:scale-[0.98] transition-transform"
               style={{
-                background: "linear-gradient(135deg, #00b8ff, #0066ff)",
+                background: "linear-gradient(135deg, #ff3b3b, #a30d0d)",
                 boxShadow: "0 8px 22px -8px rgba(0,102,255,0.65)",
               }}
             >
@@ -1064,14 +1064,14 @@ const ProxyConfig = () => {
             onClick={(e) => e.stopPropagation()}
             className="relative w-full max-w-[360px] rounded-2xl p-6 bg-card"
             style={{
-              border: "1.5px solid rgba(77,184,255,0.55)",
+              border: "1.5px solid rgba(239,68,68,0.55)",
               boxShadow:
-                "0 0 0 1px rgba(29,155,240,0.2) inset, 0 20px 60px -10px rgba(29,155,240,0.45), 0 20px 60px rgba(0,0,0,0.55)",
+                "0 0 0 1px rgba(220,38,38,0.2) inset, 0 20px 60px -10px rgba(220,38,38,0.45), 0 20px 60px rgba(0,0,0,0.55)",
             }}
           >
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-400/40 flex items-center justify-center">
-                <AlertTriangle className="w-4 h-4 text-sky-300" />
+              <div className="w-9 h-9 rounded-xl bg-red-500/10 border border-red-400/40 flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-red-300" />
               </div>
               <h3 className="text-base font-semibold text-foreground">Importante</h3>
             </div>
@@ -1095,9 +1095,9 @@ const ProxyConfig = () => {
                 }}
                 className="py-2.5 rounded-xl text-sm font-semibold text-white active:scale-[0.98] transition-all"
                 style={{
-                  background: "linear-gradient(135deg, #0a2a55 0%, #0b6fd1 55%, #1d9bf0 100%)",
-                  border: "1px solid rgba(120,190,255,0.55)",
-                  boxShadow: "0 8px 22px -8px rgba(29,155,240,0.65)",
+                  background: "linear-gradient(135deg, #3a0606 0%, #8f1010 55%, #e11d1d 100%)",
+                  border: "1px solid rgba(255,150,150,0.55)",
+                  boxShadow: "0 8px 22px -8px rgba(220,38,38,0.65)",
                 }}
               >
                 Aceptar
@@ -1118,9 +1118,9 @@ const ProxyConfig = () => {
             onClick={(e) => e.stopPropagation()}
             className="relative w-full max-w-[380px] rounded-2xl p-5 bg-card space-y-4"
             style={{
-              border: "1.5px solid rgba(77,184,255,0.55)",
+              border: "1.5px solid rgba(239,68,68,0.55)",
               boxShadow:
-                "0 0 0 1px rgba(29,155,240,0.2) inset, 0 20px 60px -10px rgba(29,155,240,0.45), 0 20px 60px rgba(0,0,0,0.55)",
+                "0 0 0 1px rgba(220,38,38,0.2) inset, 0 20px 60px -10px rgba(220,38,38,0.45), 0 20px 60px rgba(0,0,0,0.55)",
             }}
           >
             <div className="flex items-center justify-between">
@@ -1137,8 +1137,8 @@ const ProxyConfig = () => {
             <div
               className="relative rounded-xl overflow-hidden bg-black"
               style={{
-                border: "1.5px solid rgba(77,184,255,0.6)",
-                boxShadow: "0 10px 30px -8px rgba(29,155,240,0.55)",
+                border: "1.5px solid rgba(239,68,68,0.6)",
+                boxShadow: "0 10px 30px -8px rgba(220,38,38,0.55)",
               }}
             >
               <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
@@ -1166,10 +1166,10 @@ const ProxyConfig = () => {
               }}
               className="w-full py-3.5 rounded-xl text-sm font-bold tracking-wide text-white active:scale-[0.98] transition-all"
               style={{
-                background: "linear-gradient(135deg, #0a2a55 0%, #0b6fd1 55%, #1d9bf0 100%)",
-                border: "1px solid rgba(120,190,255,0.55)",
+                background: "linear-gradient(135deg, #3a0606 0%, #8f1010 55%, #e11d1d 100%)",
+                border: "1px solid rgba(255,150,150,0.55)",
                 boxShadow:
-                  "0 0 0 1px rgba(29,155,240,0.25) inset, 0 12px 28px -8px rgba(29,155,240,0.65)",
+                  "0 0 0 1px rgba(220,38,38,0.25) inset, 0 12px 28px -8px rgba(220,38,38,0.65)",
               }}
             >
               Proxy.vin
