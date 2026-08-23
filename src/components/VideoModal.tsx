@@ -11,6 +11,7 @@ interface Props {
 const VideoModal = ({ open, onClose, src, title = "Reproductor" }: Props) => {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [videoRatio, setVideoRatio] = useState(4 / 3);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -77,7 +78,15 @@ const VideoModal = ({ open, onClose, src, title = "Reproductor" }: Props) => {
             controls
             autoPlay
             playsInline
-            className="block h-auto max-h-[82vh] w-auto max-w-[90vw]"
+            onLoadedMetadata={(event) => {
+              const { videoWidth, videoHeight } = event.currentTarget;
+              if (videoWidth > 0 && videoHeight > 0) setVideoRatio(videoWidth / videoHeight);
+            }}
+            className="block h-auto max-h-[82vh] max-w-[90vw]"
+            style={{
+              width: `min(90vw, ${Math.round(82 * videoRatio)}vh, 720px)`,
+              aspectRatio: videoRatio,
+            }}
           />
         </div>
 
