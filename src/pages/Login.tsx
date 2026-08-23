@@ -124,12 +124,12 @@ const Login = () => {
         <div className="relative">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -inset-4 z-20 border-[44px] border-transparent"
+            className="pointer-events-none absolute -inset-2 z-20 border-[36px] border-transparent sm:-inset-4 sm:border-[44px]"
             style={{
               borderImageSource: `url(${LOGIN_FRAME})`,
-              borderImageSlice: "150 180",
-              borderImageWidth: "44px",
-              borderImageOutset: "8px",
+              borderImageSlice: "150 190",
+              borderImageWidth: "1",
+              borderImageOutset: "0",
               borderImageRepeat: "stretch",
             }}
           />
@@ -137,9 +137,9 @@ const Login = () => {
             onSubmit={onSubmit}
             className="glass-card relative z-10 p-5 space-y-4 rounded-2xl"
             style={{
-              border: "1.5px solid rgba(239,68,68,0.55)",
+              border: "1.5px solid transparent",
               boxShadow:
-                "0 0 0 1px rgba(220,38,38,0.18) inset, 0 0 28px rgba(220,38,38,0.22), 0 12px 40px -12px rgba(200,20,20,0.45)",
+                "0 0 28px rgba(220,38,38,0.22), 0 12px 40px -12px rgba(200,20,20,0.45)",
             }}
           >
           <div className="flex items-center gap-2 pb-3 border-b border-red-500/20">
