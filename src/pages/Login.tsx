@@ -124,12 +124,12 @@ const Login = () => {
         <div className="relative">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -inset-4 z-20 border-[44px] border-transparent"
+            className="pointer-events-none absolute -inset-2 z-20 border-[36px] border-transparent sm:-inset-4 sm:border-[44px]"
             style={{
               borderImageSource: `url(${LOGIN_FRAME})`,
-              borderImageSlice: "150 180",
-              borderImageWidth: "44px",
-              borderImageOutset: "8px",
+              borderImageSlice: "150 190",
+              borderImageWidth: "1",
+              borderImageOutset: "0",
               borderImageRepeat: "stretch",
             }}
           />
