@@ -137,9 +137,9 @@ const Login = () => {
             onSubmit={onSubmit}
             className="glass-card relative z-10 p-5 space-y-4 rounded-2xl"
             style={{
-              border: "1.5px solid rgba(239,68,68,0.55)",
+              border: "1.5px solid transparent",
               boxShadow:
-                "0 0 0 1px rgba(220,38,38,0.18) inset, 0 0 28px rgba(220,38,38,0.22), 0 12px 40px -12px rgba(200,20,20,0.45)",
+                "0 0 28px rgba(220,38,38,0.22), 0 12px 40px -12px rgba(200,20,20,0.45)",
             }}
           >
           <div className="flex items-center gap-2 pb-3 border-b border-red-500/20">
