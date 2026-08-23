@@ -7,3 +7,4 @@ export const RAVE_MASCOT_RED = "/media/rave-mascot-red.png";
 export const RAVE_MODULES_BANNER = "/media/rave-modules-banner.png";
 export const PROFILE_LOOP_VIDEO = "/media/profile-loop.mp4";
 export const TITLE_LOGO = "/media/title-logo.png";
+export const LOGIN_FRAME = "/media/login-frame.webp";

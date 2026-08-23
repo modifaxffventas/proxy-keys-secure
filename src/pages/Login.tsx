@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
-import { Shield, Lock, Globe, User, KeyRound, PlayCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Shield, Lock, Globe, User, KeyRound, PlayCircle, ShoppingBag } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO, EXAMPLE_VIDEO, RAVE_MASCOT, TITLE_LOGO } from "@/lib/assets";
+import { RAVE_LOGO, EXAMPLE_VIDEO, RAVE_MASCOT, TITLE_LOGO, LOGIN_FRAME } from "@/lib/assets";
 import { useI18n, LANGUAGES } from "@/lib/i18n";
 
 
@@ -120,15 +121,27 @@ const Login = () => {
           ))}
         </div>
 
-        <form
-          onSubmit={onSubmit}
-          className="glass-card p-5 space-y-4 rounded-2xl"
-          style={{
-            border: "1.5px solid rgba(239,68,68,0.55)",
-            boxShadow:
-              "0 0 0 1px rgba(220,38,38,0.18) inset, 0 0 28px rgba(220,38,38,0.22), 0 12px 40px -12px rgba(200,20,20,0.45)",
-          }}
-        >
+        <div className="relative">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -inset-4 z-20 border-[44px] border-transparent"
+            style={{
+              borderImageSource: `url(${LOGIN_FRAME})`,
+              borderImageSlice: "150 180",
+              borderImageWidth: "44px",
+              borderImageOutset: "8px",
+              borderImageRepeat: "stretch",
+            }}
+          />
+          <form
+            onSubmit={onSubmit}
+            className="glass-card relative z-10 p-5 space-y-4 rounded-2xl"
+            style={{
+              border: "1.5px solid rgba(239,68,68,0.55)",
+              boxShadow:
+                "0 0 0 1px rgba(220,38,38,0.18) inset, 0 0 28px rgba(220,38,38,0.22), 0 12px 40px -12px rgba(200,20,20,0.45)",
+            }}
+          >
           <div className="flex items-center gap-2 pb-3 border-b border-red-500/20">
             <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-400/40 flex items-center justify-center">
               <Shield className="w-4 h-4 text-red-300" />
@@ -197,7 +210,7 @@ const Login = () => {
           </button>
 
           {/* Função Exemplo — premium button with mascot pointing at it */}
-          <div className="relative pt-1">
+          <div className="relative pt-1 space-y-2.5">
             <button
               type="button"
               onClick={() => setVideoOpen(true)}
@@ -223,6 +236,17 @@ const Login = () => {
               <span className="relative">{t("seeDemo")}</span>
             </button>
 
+            <Button
+              asChild
+              variant="outline"
+              className="relative z-20 w-full border-red-400/40 bg-secondary/70 text-foreground hover:bg-red-500/10 hover:text-foreground"
+            >
+              <a href="https://t.me/wildzinv_bot" target="_blank" rel="noopener noreferrer">
+                <ShoppingBag />
+                Comprar contraseña
+              </a>
+            </Button>
+
             {/* Mascot pointing at the button — chroma-free PNG, static */}
             <img
               src={RAVE_MASCOT}
@@ -238,7 +262,8 @@ const Login = () => {
               }}
             />
           </div>
-        </form>
+          </form>
+        </div>
 
         <div className="mt-6 text-center">
           <p className="text-[9px] text-muted-foreground/40 leading-relaxed">

@@ -59,28 +59,26 @@ const VideoModal = ({ open, onClose, src, title = "Reproductor" }: Props) => {
 
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`relative w-full max-w-[240px] transition-all duration-250 ease-out ${
+        className={`relative max-w-[90vw] transition-all duration-250 ease-out ${
           visible ? "scale-100 opacity-100" : "scale-95 opacity-0"
         }`}
       >
         <div
-          className="relative rounded-2xl overflow-hidden bg-black"
+          className="relative overflow-hidden rounded-lg bg-transparent"
           style={{
             border: "1px solid rgba(255,150,150,0.35)",
             boxShadow:
               "0 0 0 1px rgba(220,38,38,0.18) inset, 0 10px 40px -8px rgba(220,38,38,0.45), 0 20px 60px rgba(0,0,0,0.55)",
           }}
         >
-          <div className="relative aspect-[9/16]">
-            <video
-              ref={videoRef}
-              src={src}
-              controls
-              autoPlay
-              playsInline
-              className="w-full h-full object-contain bg-black"
-            />
-          </div>
+          <video
+            ref={videoRef}
+            src={src}
+            controls
+            autoPlay
+            playsInline
+            className="block h-auto max-h-[82vh] w-auto max-w-[90vw]"
+          />
         </div>
 
         {title && (
