@@ -121,25 +121,22 @@ const Login = () => {
           ))}
         </div>
 
-        <div className="relative">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -inset-2 z-20 border-[36px] border-transparent sm:-inset-4 sm:border-[44px]"
-            style={{
-              borderImageSource: `url(${LOGIN_FRAME})`,
-              borderImageSlice: "150 190",
-              borderImageWidth: "1",
-              borderImageOutset: "0",
-              borderImageRepeat: "stretch",
-            }}
-          />
+        <div
+          className="relative -mx-5 border-[34px] border-solid border-transparent sm:-mx-8 sm:border-[44px]"
+          style={{
+            borderImageSource: `url(${LOGIN_FRAME})`,
+            borderImageSlice: "150 190 fill",
+            borderImageWidth: "1",
+            borderImageOutset: "0",
+            borderImageRepeat: "stretch",
+            filter: "drop-shadow(0 12px 28px rgba(185,20,20,0.32))",
+          }}
+        >
           <form
             onSubmit={onSubmit}
-            className="glass-card relative z-10 p-5 space-y-4 rounded-2xl"
+            className="relative z-10 -m-1 space-y-4 bg-card/85 p-5 backdrop-blur-xl"
             style={{
-              border: "1.5px solid transparent",
-              boxShadow:
-                "0 0 28px rgba(220,38,38,0.22), 0 12px 40px -12px rgba(200,20,20,0.45)",
+              boxShadow: "inset 0 0 30px rgba(120,10,10,0.12)",
             }}
           >
           <div className="flex items-center gap-2 pb-3 border-b border-red-500/20">
