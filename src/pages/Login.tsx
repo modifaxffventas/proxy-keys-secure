@@ -67,7 +67,7 @@ const Login = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center px-4">
+    <div className="relative min-h-screen overflow-x-hidden flex flex-col items-center justify-center px-4">
       <VideoBackground />
 
       {/* Font for the brand title */}
