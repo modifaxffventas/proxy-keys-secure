@@ -95,6 +95,32 @@ const VideoModal = ({ open, onClose, src, title = "Reproductor" }: Props) => {
             {title}
           </p>
         )}
+
+        <div className="mt-3 max-h-[22vh] overflow-y-auto rounded-xl border border-red-400/30 bg-black/50 p-3 backdrop-blur-md">
+          <p className="text-center text-[13px] font-semibold leading-snug text-white">
+            𝐁𝐨𝐲𝐤𝐚𝐟𝐟𝐱𝟕 — 𝐄𝐥 𝐦𝐞𝐣𝐨𝐫 𝐚𝐮𝐱𝐢𝐥𝐢𝐚𝐫 𝐝𝐞 𝐦𝐢𝐫𝐚
+          </p>
+          <p className="mt-1.5 text-center text-[11px] leading-relaxed text-white/70">
+            𝐌𝐞𝐣𝐨𝐫𝐚 𝐭𝐮 𝐩𝐫𝐞𝐜𝐢𝐬𝐢ó𝐧 𝐲 𝐥𝐥𝐞𝐯𝐚 𝐭𝐮 𝐞𝐱𝐩𝐞𝐫𝐢𝐞𝐧𝐜𝐢𝐚 𝐚𝐥 𝐬𝐢𝐠𝐮𝐢𝐞𝐧𝐭𝐞 𝐧𝐢𝐯𝐞𝐥.
+          </p>
+          <p className="mt-2 text-center text-[10px] uppercase tracking-[0.18em] text-white/50">
+            𝐂𝐨𝐦𝐩𝐫𝐚 𝐭𝐮 𝐜𝐨𝐧𝐭𝐫𝐚𝐬𝐞ñ𝐚 𝐚𝐪𝐮í
+          </p>
+          <a
+            href="https://reesendshop.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="mt-2 flex w-full items-center justify-center rounded-lg px-4 py-2.5 text-[12px] font-semibold text-white transition-transform active:scale-[0.98]"
+            style={{
+              background: "linear-gradient(135deg, #3a0606 0%, #8f1010 55%, #e11d1d 100%)",
+              border: "1px solid rgba(255,150,150,0.55)",
+              boxShadow: "0 8px 22px -10px rgba(220,38,38,0.75)",
+            }}
+          >
+            reesendshop.vercel.app
+          </a>
+        </div>
       </div>
     </div>
   );
