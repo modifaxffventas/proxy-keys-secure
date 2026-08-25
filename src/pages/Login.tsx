@@ -6,7 +6,7 @@ import VideoModal from "@/components/VideoModal";
 import { Button } from "@/components/ui/button";
 import { Shield, Lock, Globe, User, KeyRound, PlayCircle, ShoppingBag } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO, EXAMPLE_VIDEO, RAVE_MASCOT, TITLE_LOGO, LOGIN_FRAME, LOGIN_BACKGROUND_VIDEO } from "@/lib/assets";
+import { EXAMPLE_VIDEO, RAVE_MASCOT, TITLE_LOGO, LOGIN_FRAME, LOGIN_PROFILE_VIDEO } from "@/lib/assets";
 import { useI18n, LANGUAGES } from "@/lib/i18n";
 
 
