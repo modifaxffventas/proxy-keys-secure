@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { toast } from "sonner";
 import { isUserBlocked } from "@/lib/keys";
 import { RAVE_LOGO, RAVE_MODULES_BANNER, PROFILE_LOOP_VIDEO } from "@/lib/assets";
 const defaultAvatar = { url: RAVE_LOGO };
@@ -977,6 +978,50 @@ const ProxyConfig = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Quick actions */}
+        <div className="grid grid-cols-2 gap-2 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+          {[
+            {
+              emoji: "🚀",
+              label: "Abrir Free Fire",
+              onClick: launchFreeFire,
+            },
+            {
+              emoji: "📋",
+              label: "Copiar mi Key",
+              onClick: async () => {
+                try {
+                  await navigator.clipboard.writeText(session.key || "");
+                  toast.success("Key copiada");
+                } catch {
+                  toast.error("No se pudo copiar");
+                }
+              },
+            },
+            {
+              emoji: "🛒",
+              label: "Comprar contraseña",
+              onClick: () => window.open("https://reesendshop.vercel.app/", "_blank", "noopener,noreferrer"),
+            },
+            {
+              emoji: "🚪",
+              label: "Cerrar sesión",
+              onClick: handleLogout,
+            },
+          ].map(({ emoji, label, onClick }) => (
+            <button
+              key={label}
+              type="button"
+              onClick={onClick}
+              className="flex flex-col items-start gap-1.5 rounded-xl border border-red-400/25 bg-card/70 px-3 py-3 text-left backdrop-blur-md transition-transform active:scale-[0.97]"
+              style={{ boxShadow: "0 10px 26px -16px rgba(220,38,38,0.7)" }}
+            >
+              <span className="text-lg leading-none">{emoji}</span>
+              <span className="text-[11px] font-semibold text-foreground">{label}</span>
+            </button>
+          ))}
         </div>
 
         {/* Creator card */}

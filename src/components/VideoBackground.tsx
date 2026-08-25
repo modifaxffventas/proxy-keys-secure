@@ -1,3 +1,5 @@
+import { APP_BACKGROUND } from "@/lib/assets";
+
 interface VideoBackgroundProps {
   videoSrc?: string;
 }
@@ -19,7 +21,7 @@ const VideoBackground = ({ videoSrc }: VideoBackgroundProps) => {
         />
       ) : (
         <img
-          src="/media/login-bg.png"
+          src={APP_BACKGROUND}
           alt=""
           aria-hidden="true"
           loading="eager"

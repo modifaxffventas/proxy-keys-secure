@@ -10,3 +10,4 @@ export const PROFILE_LOOP_VIDEO = "/media/profile-loop.mp4";
 export const LOGIN_PROFILE_VIDEO = "/media/profile-loop.mp4";
 export const TITLE_LOGO = "/media/title-logo.png";
 export const LOGIN_FRAME = "/media/login-frame.png";
+export const APP_BACKGROUND = "/media/app-bg.jpg";
