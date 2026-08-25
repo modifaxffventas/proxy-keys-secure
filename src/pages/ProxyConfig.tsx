@@ -17,7 +17,7 @@ import {
   Rocket, Timer, RefreshCw, Sparkles, Fingerprint, ShieldCheck,
   Database, Network, Bug, Unplug, Ratio, MonitorSmartphone,
   CircuitBoard, Binary, Webhook, Milestone, Scan, ShieldAlert,
-  Orbit, Waypoints
+  Orbit, Waypoints, ShoppingBag
 } from "lucide-react";
 
 interface Session {
