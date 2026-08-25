@@ -984,12 +984,12 @@ const ProxyConfig = () => {
         <div className="grid grid-cols-2 gap-2 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
           {[
             {
-              emoji: "🚀",
+              icon: Gamepad2,
               label: "Abrir Free Fire",
               onClick: launchFreeFire,
             },
             {
-              emoji: "📋",
+              icon: Copy,
               label: "Copiar mi Key",
               onClick: async () => {
                 try {
@@ -1001,24 +1001,32 @@ const ProxyConfig = () => {
               },
             },
             {
-              emoji: "🛒",
+              icon: ShoppingBag,
               label: "Comprar contraseña",
               onClick: () => window.open("https://reesendshop.vercel.app/", "_blank", "noopener,noreferrer"),
             },
             {
-              emoji: "🚪",
+              icon: LogOut,
               label: "Cerrar sesión",
               onClick: handleLogout,
             },
-          ].map(({ emoji, label, onClick }) => (
+          ].map(({ icon: Icon, label, onClick }) => (
             <button
               key={label}
               type="button"
               onClick={onClick}
-              className="flex flex-col items-start gap-1.5 rounded-xl border border-red-400/25 bg-card/70 px-3 py-3 text-left backdrop-blur-md transition-transform active:scale-[0.97]"
+              className="flex flex-col items-start gap-2 rounded-xl border border-red-400/25 bg-card/70 px-3 py-3 text-left backdrop-blur-md transition-transform active:scale-[0.97]"
               style={{ boxShadow: "0 10px 26px -16px rgba(220,38,38,0.7)" }}
             >
-              <span className="text-lg leading-none">{emoji}</span>
+              <span
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-400/35"
+                style={{
+                  background: "linear-gradient(135deg, rgba(58,6,6,0.9) 0%, rgba(225,29,29,0.55) 100%)",
+                  boxShadow: "inset 0 0 0 1px rgba(255,150,150,0.15)",
+                }}
+              >
+                <Icon className="h-4 w-4 text-red-200" />
+              </span>
               <span className="text-[11px] font-semibold text-foreground">{label}</span>
             </button>
           ))}
