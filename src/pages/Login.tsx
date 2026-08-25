@@ -6,7 +6,7 @@ import VideoModal from "@/components/VideoModal";
 import { Button } from "@/components/ui/button";
 import { Shield, Lock, Globe, User, KeyRound, PlayCircle, ShoppingBag } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO, EXAMPLE_VIDEO, RAVE_MASCOT, TITLE_LOGO, LOGIN_FRAME, LOGIN_BACKGROUND_VIDEO } from "@/lib/assets";
+import { EXAMPLE_VIDEO, RAVE_MASCOT, TITLE_LOGO, LOGIN_FRAME, LOGIN_PROFILE_VIDEO } from "@/lib/assets";
 import { useI18n, LANGUAGES } from "@/lib/i18n";
 
 
@@ -68,7 +68,7 @@ const Login = () => {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden flex flex-col items-center justify-center px-4">
-      <VideoBackground videoSrc={LOGIN_BACKGROUND_VIDEO} />
+      <VideoBackground />
 
       {/* Font for the brand title */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -89,7 +89,17 @@ const Login = () => {
             >
               <div className="p-[2px] rounded-full bg-background">
                 <div className="w-24 h-24 rounded-full overflow-hidden bg-black">
-                  <img src={RAVE_LOGO} alt="Boykaffx7" className="w-full h-full object-cover" />
+                  <video
+                    src={LOGIN_PROFILE_VIDEO}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="auto"
+                    disablePictureInPicture
+                    aria-label="Boykaffx7"
+                    className="w-full h-full object-cover pointer-events-none"
+                  />
                 </div>
               </div>
             </div>
