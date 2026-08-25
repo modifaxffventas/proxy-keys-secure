@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { toast } from "sonner";
 import { isUserBlocked } from "@/lib/keys";
 import { RAVE_LOGO, RAVE_MODULES_BANNER, PROFILE_LOOP_VIDEO } from "@/lib/assets";
 const defaultAvatar = { url: RAVE_LOGO };
