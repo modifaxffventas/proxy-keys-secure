@@ -4,9 +4,9 @@ import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
 import { Button } from "@/components/ui/button";
-import { Shield, Lock, Globe, User, KeyRound, PlayCircle, ShoppingBag } from "lucide-react";
+import { Shield, Lock, Globe, User, KeyRound, PlayCircle, ShoppingBag, ArrowRight } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import { EXAMPLE_VIDEO, RAVE_MASCOT, TITLE_LOGO, LOGIN_FRAME, LOGIN_PROFILE_VIDEO } from "@/lib/assets";
+import { EXAMPLE_VIDEO, TITLE_LOGO, LOGIN_PROFILE_VIDEO } from "@/lib/assets";
 import { useI18n, LANGUAGES } from "@/lib/i18n";
 
 
@@ -67,128 +67,64 @@ const Login = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden flex flex-col items-center justify-center px-4">
+    <div className="relative min-h-[100dvh] overflow-x-hidden flex flex-col items-center justify-center px-4 py-5 sm:py-8">
       <VideoBackground />
+      <div className="relative z-10 w-full max-w-[390px] animate-card-in">
+        <form onSubmit={onSubmit} className="relative overflow-hidden rounded-[28px] border border-brand/35 bg-glass/90 px-5 pb-5 pt-4 shadow-brand backdrop-blur-2xl sm:px-6">
+          <div aria-hidden className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-brand-soft to-transparent" />
 
-      {/* Font for the brand title */}
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap"
-        rel="stylesheet"
-      />
-
-      <div className="relative z-10 w-full max-w-sm animate-fade-in-up">
-        <div className="flex flex-col items-center mb-6">
-          <div className="relative mb-3 flex items-center justify-center">
-            <div
-              className="p-[3px] rounded-full"
-              style={{
-                background: "conic-gradient(from 0deg, #ff3b3b, #ff7a7a, #a30d0d, #ff3b3b, #ff4d4d)",
-                boxShadow: "0 0 28px rgba(239,68,68,0.6), 0 0 10px rgba(255,120,120,0.55)",
-              }}
-            >
-              <div className="p-[2px] rounded-full bg-background">
-                <div className="w-24 h-24 rounded-full overflow-hidden bg-black">
-                  <video
-                    src={LOGIN_PROFILE_VIDEO}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    preload="auto"
-                    disablePictureInPicture
-                    aria-label="Boykaffx7"
-                    className="w-full h-full object-cover pointer-events-none"
-                  />
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="animate-profile-glow relative h-[68px] w-[68px] shrink-0 rounded-full border border-brand-soft/60 bg-brand-deep p-1">
+                <div className="h-full w-full overflow-hidden rounded-full bg-background">
+                  <video src={LOGIN_PROFILE_VIDEO} autoPlay loop muted playsInline preload="auto" disablePictureInPicture aria-label="Boykaffx7" className="h-full w-full object-cover pointer-events-none" />
                 </div>
+                <span className="absolute bottom-0.5 right-0.5 h-3.5 w-3.5 rounded-full border-2 border-glass bg-success" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <img src={TITLE_LOGO} alt="Boykaffx7" className="max-h-10 w-[150px] max-w-full object-contain object-left" draggable={false} />
+                  <VerifiedBadge size={18} />
+                </div>
+                <p className="mt-1 text-[9px] uppercase tracking-widest text-muted-foreground">{t("secureGateway")}</p>
               </div>
             </div>
-          </div>
-          <div className="flex items-center justify-center gap-1.5 mb-1 w-full">
-            <img
-              src={TITLE_LOGO}
-              alt="Boykaffx7"
-              className="w-[min(78%,260px)] h-auto object-contain"
-              style={{ filter: "drop-shadow(0 6px 18px rgba(200,20,20,0.35))" }}
-              draggable={false}
-            />
-            <VerifiedBadge size={20} />
-          </div>
-
-          <p className="text-[10px] text-muted-foreground/70 tracking-widest uppercase">{t("secureGateway")}</p>
-        </div>
-
-        <div className="flex items-center justify-center gap-2 mb-5 flex-wrap">
-          {[
-            { icon: Shield, label: t("aes") },
-            { icon: Lock, label: t("tls") },
-            { icon: Globe, label: t("auth") },
-          ].map(({ icon: Icon, label }) => (
-            <div key={label} className="flex items-center gap-1.5 bg-secondary/40 border border-border/40 rounded-full px-3 py-1">
-              <Icon className="w-3 h-3 text-red-400" />
-              <span className="text-[9px] text-muted-foreground font-medium">{label}</span>
-            </div>
-          ))}
-        </div>
-
-        <div
-          className="relative -mx-5 border-[34px] border-solid border-transparent sm:-mx-8 sm:border-[44px]"
-          style={{
-            borderImageSource: `url(${LOGIN_FRAME})`,
-            borderImageSlice: "150 190 fill",
-            borderImageWidth: "1",
-            borderImageOutset: "0",
-            borderImageRepeat: "stretch",
-            filter: "drop-shadow(0 12px 28px rgba(185,20,20,0.32))",
-          }}
-        >
-          <form
-            onSubmit={onSubmit}
-            className="relative z-10 -m-1 space-y-4 bg-card/85 p-5 backdrop-blur-xl"
-            style={{
-              boxShadow: "inset 0 0 30px rgba(120,10,10,0.12)",
-            }}
-          >
-          <div className="flex items-center gap-2 pb-3 border-b border-red-500/20">
-            <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-400/40 flex items-center justify-center">
-              <Shield className="w-4 h-4 text-red-300" />
-            </div>
-            <div className="flex-1">
-              <span className="text-xs text-foreground font-semibold block">{t("secureAccess")}</span>
-              <span className="text-[9px] text-muted-foreground/60">{t("enterCreds")}</span>
-            </div>
-            <div className="relative">
-              <Globe className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-red-300 pointer-events-none" />
-              <select
-                aria-label={t("language")}
-                value={lang}
-                onChange={(e) => setLang(e.target.value as typeof lang)}
-                className="appearance-none bg-secondary/60 border border-red-400/30 rounded-md pl-7 pr-2 py-1 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-red-400 max-w-[110px]"
-              >
-                {LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code} className="bg-background text-foreground">
-                    {l.label}
-                  </option>
-                ))}
+            <div className="relative shrink-0">
+              <Globe className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brand-soft" />
+              <select aria-label={t("language")} value={lang} onChange={(e) => setLang(e.target.value as typeof lang)} className="h-9 w-9 appearance-none rounded-full border border-brand/30 bg-secondary/70 pl-8 text-transparent outline-none focus:ring-2 focus:ring-brand/40">
+                {LANGUAGES.map((l) => <option key={l.code} value={l.code} className="bg-background text-foreground">{l.label}</option>)}
               </select>
             </div>
           </div>
 
+          <div className="my-4 flex items-center justify-between gap-2 border-y border-border/60 py-2.5">
+            <div>
+              <p className="text-xs font-semibold text-foreground">{t("secureAccess")}</p>
+              <p className="text-[9px] text-muted-foreground">{t("enterCreds")}</p>
+            </div>
+            <div className="flex gap-1.5">
+              {[{ icon: Shield, label: t("aes") }, { icon: Lock, label: t("tls") }, { icon: Globe, label: t("auth") }].map(({ icon: Icon, label }) => (
+                <span key={label} title={label} className="flex h-7 w-7 items-center justify-center rounded-full border border-brand/20 bg-brand/10 text-brand-soft"><Icon className="h-3.5 w-3.5" /></span>
+              ))}
+            </div>
+          </div>
+
           {error && (
-            <p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-2.5">{error}</p>
+            <p className="mb-3 rounded-lg border border-destructive/30 bg-destructive/10 p-2.5 text-xs text-destructive">{error}</p>
           )}
 
+          <div className="space-y-3.5">
           <div>
             <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">{t("user")}</label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
+              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder={t("userPlaceholder")}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoComplete="username"
-                className="w-full bg-secondary/40 border border-border/50 rounded-lg pl-10 pr-4 py-2.5 text-base text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
+                className="h-12 w-full rounded-xl border border-border bg-secondary/45 pl-10 pr-4 text-base text-foreground outline-none placeholder:text-muted-foreground/50 transition-[border-color,box-shadow] duration-150 focus:border-brand/50 focus:ring-2 focus:ring-brand/15"
               />
             </div>
           </div>
@@ -196,83 +132,41 @@ const Login = () => {
           <div>
             <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">{t("accessKey")}</label>
             <div className="relative">
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
+              <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder={t("keyPlaceholder")}
                 value={key}
                 onChange={(e) => setKey(e.target.value.toUpperCase())}
                 autoComplete="off"
-                className="w-full bg-secondary/40 border border-border/50 rounded-lg pl-10 pr-4 py-2.5 text-base font-mono tracking-wider text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
+                className="h-12 w-full rounded-xl border border-border bg-secondary/45 pl-10 pr-4 text-base font-mono text-foreground outline-none placeholder:text-muted-foreground/50 transition-[border-color,box-shadow] duration-150 focus:border-brand/50 focus:ring-2 focus:ring-brand/15"
               />
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-foreground text-background font-semibold py-3 rounded-lg text-sm hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
-          >
-            {loading ? t("verifying") : t("enter")}
-          </button>
+          <Button type="submit" disabled={loading} className="h-12 w-full rounded-xl bg-brand text-brand-foreground shadow-brand hover:bg-brand/90 active:scale-[0.98]">
+            {loading ? t("verifying") : t("enter")} {!loading && <ArrowRight className="h-4 w-4" />}
+          </Button>
 
-          {/* Função Exemplo — premium button with mascot pointing at it */}
-          <div className="relative pt-1 space-y-2.5">
-            <button
-              type="button"
-              onClick={() => setVideoOpen(true)}
-              className="relative group w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-semibold tracking-wide text-white overflow-hidden active:scale-[0.98] transition-transform"
-              style={{
-                background:
-                  "linear-gradient(135deg, #3a0606 0%, #8f1010 55%, #e11d1d 100%)",
-                border: "1px solid rgba(255,150,150,0.55)",
-                boxShadow:
-                  "0 0 0 1px rgba(220,38,38,0.25) inset, 0 10px 28px -8px rgba(220,38,38,0.55), 0 2px 8px rgba(0,0,0,0.4)",
-              }}
-            >
-              {/* subtle sheen */}
-              <span
-                aria-hidden
-                className="absolute inset-0 opacity-40"
-                style={{
-                  background:
-                    "linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0) 45%)",
-                }}
-              />
-              <PlayCircle className="relative w-[18px] h-[18px]" />
-              <span className="relative">{t("seeDemo")}</span>
-            </button>
-
+          <div className="grid grid-cols-2 gap-2.5">
+            <Button type="button" variant="outline" onClick={() => setVideoOpen(true)} className="h-11 rounded-xl border-brand/30 bg-brand/10 text-foreground hover:bg-brand/20 hover:text-foreground">
+              <PlayCircle /> <span className="truncate">{t("seeDemo")}</span>
+            </Button>
             <Button
               asChild
               variant="outline"
-              className="relative z-20 w-full border-red-400/40 bg-secondary/70 text-foreground hover:bg-red-500/10 hover:text-foreground"
+              className="h-11 rounded-xl border-border bg-secondary/60 text-foreground hover:bg-secondary hover:text-foreground"
             >
               <a href="https://t.me/wildzinv_bot" target="_blank" rel="noopener noreferrer">
                 <ShoppingBag />
-                Comprar contraseña
+                <span className="truncate">Comprar</span>
               </a>
             </Button>
-
-            {/* Mascot pointing at the button — chroma-free PNG, static */}
-            <img
-              src={RAVE_MASCOT}
-              alt=""
-              aria-hidden="true"
-              loading="eager"
-              decoding="async"
-              draggable={false}
-              className="pointer-events-none select-none absolute -bottom-6 -right-3 w-24 h-auto z-10"
-              style={{
-                filter: "drop-shadow(0 10px 18px rgba(200,20,20,0.35))",
-                transform: "scaleX(-1)",
-              }}
-            />
+          </div>
           </div>
           </form>
-        </div>
 
-        <div className="mt-6 text-center">
+        <div className="mt-3 text-center">
           <p className="text-[9px] text-muted-foreground/40 leading-relaxed">
             {t("footer")}
             <br />{t("footer2")}
