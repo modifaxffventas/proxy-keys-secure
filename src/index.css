@@ -38,6 +38,12 @@
 
     --success: 142 72% 50%;
     --warning: 38 92% 50%;
+    --brand: 0 78% 54%;
+    --brand-foreground: 0 0% 100%;
+    --brand-deep: 0 72% 24%;
+    --brand-soft: 0 76% 68%;
+    --glass: 0 0% 6%;
+    --shadow-brand: 0 18px 50px -18px hsl(var(--brand) / 0.55);
   }
 }
 
@@ -163,6 +169,20 @@ input[type="range"]:active::-moz-range-thumb {
   to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 .animate-card-in { animation: card-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes profile-glow {
+  0%, 100% { box-shadow: 0 0 18px hsl(var(--brand) / 0.2); }
+  50% { box-shadow: 0 0 30px hsl(var(--brand) / 0.42); }
+}
+.animate-profile-glow { animation: profile-glow 3.8s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-profile-glow,
+  .animate-card-in,
+  .animate-fade-in-up {
+    animation: none;
+  }
+}
 
 @keyframes digit-tick {
   0% { transform: translateY(-6px); opacity: 0; }
