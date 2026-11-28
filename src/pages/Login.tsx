@@ -626,16 +626,16 @@ const Login = () => {
 
               <h2 className="mt-[26px] text-[18px] font-bold tracking-[-0.015em] text-[#1a1a1a]">Método de pago</h2>
 
-              <div className="mx-[14px] mt-[11px] rounded-[11px] border border-[#e5e5e5] p-[2px] pb-[2px]">
-                <div className="flex items-center gap-[14px] px-[11px] pb-[9px] pt-[8px]">
+              <div className="mt-[12px] rounded-[12px] border border-[#e5e5e5] p-[16px] pb-0">
+                <div className="flex items-center gap-[14px] pb-[13px]">
                   <span className="flex h-[15px] w-[15px] shrink-0 items-center justify-center rounded-full border-[5.5px] border-[#111] bg-white" aria-hidden="true" />
                   <CardGlyph />
                   <span className="text-[16px] text-[#1a1a1a]">Tarjeta</span>
                 </div>
 
-                <p className="mb-[5px] px-[11px] text-[15px] text-[#4a4a4a]">Información de la tarjeta</p>
+                <p className="mb-[6px] text-[15px] text-[#4a4a4a]">Información de la tarjeta</p>
 
-                <div className={`overflow-hidden rounded-[9px] border bg-white transition-colors focus-within:border-[#a8a8a8] ${field === "card" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}>
+                <div className={`overflow-hidden rounded-[12px] border bg-white transition-colors focus-within:border-[#a8a8a8] ${field === "card" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}>
                   <div className="flex h-[42px] items-center gap-2 pl-[13px] pr-[8px]">
                     <input
                       id="cc-number"
@@ -691,7 +691,7 @@ const Login = () => {
                   </div>
                 </div>
 
-                <p className="mb-[5px] mt-[26px] px-[11px] text-[15px] text-[#1a1a1a]">Nombre del titular de tarjeta</p>
+                <p className="mb-[6px] mt-[21px] text-[15px] text-[#1a1a1a]">Nombre del titular de tarjeta</p>
                 <input
                   id="cc-name"
                   type="text"
@@ -703,12 +703,12 @@ const Login = () => {
                   spellCheck={false}
                   maxLength={40}
                   aria-invalid={field === "holder"}
-                  className={`h-[42px] w-full rounded-[9px] border bg-white px-[13px] text-[16px] uppercase text-[#1a1a1a] outline-none transition-colors placeholder:normal-case placeholder:text-[#9b9b9b] focus:border-[#a8a8a8] ${field === "holder" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}
+                  className={`h-[42px] w-full rounded-[12px] border bg-white px-[13px] text-[16px] uppercase text-[#1a1a1a] outline-none transition-colors placeholder:normal-case placeholder:text-[#9b9b9b] focus:border-[#a8a8a8] ${field === "holder" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}
                 />
 
-                <p className="mb-[6px] mt-[24px] px-[11px] text-[15px] text-[#1a1a1a]">Dirección de facturación</p>
+                <p className="mb-[6px] mt-[23px] text-[15px] text-[#1a1a1a]">Dirección de facturación</p>
 
-                <div className={`overflow-hidden rounded-[9px] border bg-white ${field === "address" || field === "zip" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}>
+                <div className={`overflow-hidden rounded-[12px] border bg-white ${field === "address" || field === "zip" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}>
                   <div className="relative">
                     <select
                       id="country"
@@ -791,7 +791,7 @@ const Login = () => {
                   </div>
                 </div>
 
-                <label className="mt-[21px] flex cursor-pointer items-start gap-[12px] px-[11px]">
+                <label className="mt-[18px] flex cursor-pointer items-start gap-[12px]">
                   <span className="relative mt-[2px] flex h-[19px] w-[19px] shrink-0 items-center justify-center">
                     <input
                       type="checkbox"
@@ -806,7 +806,7 @@ const Login = () => {
                   </span>
                 </label>
 
-                <div className="mt-[17px] flex items-center gap-[14px] border-t border-[#e5e5e5] px-[11px] pb-[11px] pt-[16px]">
+                <div className="-mx-[16px] mt-[16px] flex items-center gap-[14px] border-t border-[#e5e5e5] px-[16px] pb-[14px] pt-[18px]">
                   <span className={`flex h-[15px] w-[15px] shrink-0 items-center justify-center rounded-full border bg-white ${method === "gpay" ? "border-[5.5px] border-[#111]" : "border-[1.5px] border-[#c9c9c9]"}`} aria-hidden="true" />
                   <span className="flex items-center gap-[9px] text-[16px] text-[#1a1a1a]">
                     <span className="flex h-[17px] items-center rounded-[3px] border border-[#111] bg-white px-[4px]">
